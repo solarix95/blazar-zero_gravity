@@ -8,4 +8,16 @@ INCLUDEPATH += .
 QT += widgets
 
 # Input
-SOURCES += main.cc
+SOURCES += main.cc \
+    blazerwidget.cc \
+    model/bzbody.cc \
+    model/bzmodel.cc \
+    model/bzobject.cc \
+    model/bztypes.cc
+
+HEADERS += \
+    blazerwidget.h \
+    model/bzbody.h \
+    model/bzmodel.h \
+    model/bzobject.h \
+    model/bztypes.h

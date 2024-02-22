@@ -1,4 +1,5 @@
 #include <QList>
+#include <QDebug>
 
 #include "bzmodel.h"
 #include "bztypes.h"
@@ -25,6 +26,7 @@ void BzModel::process(int ms)
 //-------------------------------------------------------------------------------------------------
 void BzModel::processLeapfrog(int ms)
 {
+    qDebug() << "processLeapfrog";
     updateBodyVectors(ms);
     updateBodyPositions(ms);
 }
@@ -49,6 +51,11 @@ void BzModel::updateBodyVectors(int ms)
 
             forces.append( v * (other->mass()/(d*d)));
         }
+        if (forces.isEmpty())
+            continue;
+
+        nextBody->accelerate(forces,ms);
+        forces.clear();
     }
 }
 

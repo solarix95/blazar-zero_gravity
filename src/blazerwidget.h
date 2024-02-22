@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+class Qtr3dWidget;
 class BzModel;
 class BlazerWidget  : public QWidget
 {
@@ -12,8 +13,11 @@ public:
     void init();
 
 private:
+    void initDisplay();
+    void initModel();
 
-    BzModel *mModel;
+    Qtr3dWidget *m3DDisplay;
+    BzModel     *mModel;
 };
 
 #endif // BLAZERWIDGET_H

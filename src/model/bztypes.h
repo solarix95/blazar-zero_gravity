@@ -18,7 +18,8 @@ public:
     BzVector3D normalized() const;
     void       normalize();
 
-     BzVector3D &operator+=(const BzVector3D &vector);
+    BzVector3D &operator+=(const BzVector3D &vector);
+    operator QString() const { return QString("X:%1, Y:%2, Z:%3").arg(x,0,'e',24).arg(y).arg(z); }
 };
 
 // related non-member operators

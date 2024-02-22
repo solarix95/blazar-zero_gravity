@@ -7,6 +7,9 @@ int main(int argc, char *argv[]) {
 
 
     BlazerWidget w;
+
+    w.init();
+
     w.show();
 
 	return app.exec();

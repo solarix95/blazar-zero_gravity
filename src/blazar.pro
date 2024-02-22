@@ -6,6 +6,12 @@ TEMPLATE = app
 TARGET = blazar
 INCLUDEPATH += .
 QT += widgets
+CONFIG += debug
+DESTDIR = ../bin
+
+LIBQTR3D_PATH = ../../libqtr3d/
+
+include(../../libqtr3d/libqtr3d.pro)
 
 # Input
 SOURCES += main.cc \

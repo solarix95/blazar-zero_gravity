@@ -44,12 +44,6 @@ void BzVector3D::normalize()
     x = x / magnitude;
     y = y / magnitude;
     z = z / magnitude;
-    if (x < EPSILON)
-        x = 0.0;
-    if (y < EPSILON)
-        y = 0.0;
-    if (z < EPSILON)
-        z = 0.0;
 }
 
 //-------------------------------------------------------------------------------------------------

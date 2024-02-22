@@ -2,11 +2,14 @@
 #define BZBODY_H
 
 #include "bztypes.h"
+#include "bzobject.h"
 
-class BzBody
+class BzBody : public BzObject
 {
+    Q_OBJECT
 public:
     BzBody(double massInTons = 0.0);
+    virtual ~BzBody() = default;
 
     inline void   setMass(double m) { mMass = m; }
     inline double mass() const      { return mMass; }
@@ -22,6 +25,7 @@ public:
 protected:
 
 private:
+    qint64      mTime;
     double      mMass;
     BzPos       mGlobalPos;
     BzVelocity  mVelocity;

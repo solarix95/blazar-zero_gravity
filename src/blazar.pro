@@ -14,15 +14,20 @@ LIBQTR3D_PATH = ../../libqtr3d/
 include(../../libqtr3d/libqtr3d.pro)
 
 # Input
-SOURCES += main.cc \
-    blazerwidget.cc \
+SOURCES += \
+    blazarwidget.cc \
+    main.cc \
+    assets/bzassets.cc \
+    assets/bztextures.cc \
     model/bzbody.cc \
     model/bzmodel.cc \
     model/bzobject.cc \
     model/bztypes.cc
 
 HEADERS += \
-    blazerwidget.h \
+    assets/bzassets.h \
+    assets/bztextures.h \
+    blazarwidget.h \
     model/bzbody.h \
     model/bzmodel.h \
     model/bzobject.h \

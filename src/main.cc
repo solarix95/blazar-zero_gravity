@@ -1,12 +1,12 @@
 #include <QApplication>
 
-#include "blazerwidget.h"
+#include "blazarwidget.h"
 
 int main(int argc, char *argv[]) {
 	QApplication app(argc,argv);
 
 
-    BlazerWidget w;
+    BlazarWidget w;
 
     w.init();
 

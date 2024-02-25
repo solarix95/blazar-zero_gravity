@@ -26,7 +26,7 @@ void BzModel::process(int ms)
 //-------------------------------------------------------------------------------------------------
 void BzModel::processLeapfrog(int ms)
 {
-    qDebug() << "processLeapfrog";
+    // qDebug() << "processLeapfrog";
     updateBodyVectors(ms);
     updateBodyPositions(ms);
 }

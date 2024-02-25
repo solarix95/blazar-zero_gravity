@@ -32,8 +32,11 @@ void BzBody::process(int ms)
 {
     mTime += ms;
     mGlobalPos += mVelocity * ms;
+
+    /*
     if (ident() == "earth")
         qDebug() << ident() << mTime << 100*(mTime/(1000.0*3600*24*365)) << "[%]" << mTime/(1000.0*3600)<< "[h]"
                  << mVelocity
                  << mGlobalPos;
+    */
 }

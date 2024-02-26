@@ -11,9 +11,11 @@
 
 #include "blazarwidget.h"
 
+#include "assets/bzconfigs.h"
 #include "assets/bztextures.h"
 #include "model/bzmodel.h"
 #include "model/bzbody.h"
+#include "model/bzplanet.h"
 
 //-------------------------------------------------------------------------------------------------
 BlazarWidget::BlazarWidget()
@@ -52,6 +54,31 @@ void BlazarWidget::initModel()
 {
     mModel = new BzModel();
 
+    auto scenario = mAssets.scenarios().byName("Softwaretest Mars");
+    mModel->deserialize(scenario);
+
+    /*
+    auto planets  = scenario.childsByType("planet");
+
+    for (const auto &planetCfg: planets) {
+        double radius   = planetCfg.parameter("radius").toDouble();
+        if (radius <= 0)
+            continue;
+
+        double mass     = planetCfg.parameter("mass").toDouble();
+        if (mass <= 0)
+            continue;
+
+        QString texture = planetCfg.parameter("texture").toString();
+        if (texture.isEmpty())
+            continue;
+
+        auto *planet   = new BzPlanet(mass,radius,texture);
+        mModel->addBody(planet);
+    }
+    */
+
+    /*
     auto *sun   = new BzBody(1.989e30);
     auto *earth = new BzBody(5.972e24);
     earth->setIdent("earth");
@@ -61,28 +88,47 @@ void BlazarWidget::initModel()
 
     mModel->addBody(sun);
     mModel->addBody(earth);
+    */
 }
 
 //-------------------------------------------------------------------------------------------------
 void BlazarWidget::initRendering()
 {
     Q_ASSERT(m3DDisplay);
-    auto *mesh = m3DDisplay->createMesh();
 
-    Qtr3d::meshBySphere(*mesh,640,640,696340,true,mAssets.textures()["8k_moon.jpg"]);
-    mesh->material() = Qtr3d::Material(1,0,0);
-    auto *sun1 = m3DDisplay->createState(mesh);
+    double distance = 0;
+    for(auto *body: mModel->bodies()) {
+        BzPlanet *p = dynamic_cast<BzPlanet*>(body);
+        if (!p)
+            continue;
+
+        auto *mesh = m3DDisplay->createMesh();
+        Qtr3d::meshBySphere(*mesh,640,640,p->radius(),true,mAssets.textures()[p->textureName()]);
+        mesh->material() = Qtr3d::Material(1,0,0);
+        auto *planetRepresentation = m3DDisplay->createState(mesh);
+        distance = p->radius() * 3;
+    }
+
+
+
 
     // sun1->setRotation({90,0,0});
 
-    m3DDisplay->primaryLightSource()->setPos({0,0,0});
-    m3DDisplay->primaryLightSource()->setAmbientStrength(0.1);
+    // m3DDisplay->primaryLightSource()->setPos({0,0,0});
+    // m3DDisplay->primaryLightSource()->setAmbientStrength(0.1);
     m3DDisplay->camera()->setFov(45,1,100000000);
-    m3DDisplay->camera()->setPos(0,0,-3*696340);
+    m3DDisplay->camera()->setPos(0,0,distance);
+    m3DDisplay->camera()->lookAt({0,0,0},{0,1,0});
+    m3DDisplay->setDefaultLighting(Qtr3d::NoLighting);
 
-    m3DDisplay->setDefaultLighting(Qtr3d::PhongLighting);
-
-    static double pulsating = 0;
+    if (!mModel->worldTexture().isEmpty()) {
+        auto mesh = m3DDisplay->createMesh();
+        Qtr3d::meshBySphere(*mesh,640,640,mModel->worldRadius(),false,mAssets.textures()[mModel->worldTexture()]);
+        mesh->material() = Qtr3d::Material(1,0,0);
+        auto *milkyway = m3DDisplay->createState(mesh);
+    }
+    /*
+    static float pulsating = 0;
     connect(&m3DDisplay->assets()->loop(), &Qtr3dFpsLoop::stepDone, this, [this, mesh, sun1]() {
        pulsating += 0.001;
         mesh->material() = Qtr3d::Material(1 + (0.5 * sin(pulsating)),0,0);
@@ -93,15 +139,13 @@ void BlazarWidget::initRendering()
        m3DDisplay->update();
     });
 
-    mesh = m3DDisplay->createMesh();
-    Qtr3d::meshBySphere(*mesh,640,640,69634000,false,mAssets.textures()["8k_stars_milky_way.jpg"]);
-    mesh->material() = Qtr3d::Material(1,0,0);
-    auto *milkyway = m3DDisplay->createState(mesh);
+
 
     connect(&m3DDisplay->assets()->loop(),&Qtr3dFpsLoop::step, this, [this](float ms, float normalizedSpeed) {
         mModel->process(ms);
     });
 
     m3DDisplay->assets()->loop().setFps(50);
-    m3DDisplay->assets()->loop().setSpeed(1000000);
+    */
+    // m3DDisplay->assets()->loop().setSpeed(1000000);
 }

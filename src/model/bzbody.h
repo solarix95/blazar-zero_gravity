@@ -1,6 +1,7 @@
 #ifndef BZBODY_H
 #define BZBODY_H
 
+#include <QList>
 #include "bztypes.h"
 #include "bzobject.h"
 
@@ -30,5 +31,7 @@ private:
     BzPos       mGlobalPos;
     BzVelocity  mVelocity;
 };
+
+using BzBodyList = QList<BzBody*>;
 
 #endif // BZBODY_H

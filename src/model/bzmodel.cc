@@ -1,13 +1,43 @@
 #include <QList>
 #include <QDebug>
 
+#include "assets/bzconfig.h"
 #include "bzmodel.h"
 #include "bztypes.h"
 #include "bzbody.h"
+#include "bzplanet.h"
 
 //-------------------------------------------------------------------------------------------------
 BzModel::BzModel()
 {
+}
+
+//-------------------------------------------------------------------------------------------------
+void BzModel::deserialize(const BzConfig &cfg)
+{
+    Q_ASSERT(cfg.isValid());
+
+    auto planets  = cfg.childsByType("planet");
+
+    for (const auto &planetCfg: planets) {
+        double radius   = planetCfg.parameter("radius").toDouble();
+        if (radius <= 0)
+            continue;
+
+        double mass     = planetCfg.parameter("mass").toDouble();
+        if (mass <= 0)
+            continue;
+
+        QString texture = planetCfg.parameter("texture").toString();
+        if (texture.isEmpty())
+            continue;
+
+        auto *planet   = new BzPlanet(mass,radius,texture);
+        addBody(planet);
+    }
+
+    mWorldRadius = cfg.parameter("worldradius",10000).toDouble();
+    mWorldTexture= cfg.parameter("worldtexture").toString();
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -19,6 +19,8 @@ SOURCES += \
     assets/bzconfigs.cc \
     assets/bzscenarios.cc \
     blazarwidget.cc \
+    dialogs/dialogmain.cc \
+    dialogs/dialogscenarioselection.cc \
     main.cc \
     assets/bzassets.cc \
     assets/bztextures.cc \
@@ -35,8 +37,14 @@ HEADERS += \
     assets/bzscenarios.h \
     assets/bztextures.h \
     blazarwidget.h \
+    dialogs/dialogmain.h \
+    dialogs/dialogscenarioselection.h \
     model/bzbody.h \
     model/bzmodel.h \
     model/bzobject.h \
     model/bzplanet.h \
     model/bztypes.h
+
+FORMS += \
+    dialogs/dialogmain.ui \
+    dialogs/dialogscenarioselection.ui

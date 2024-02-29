@@ -20,6 +20,8 @@ public:
 
     BzVector3D &operator+=(const BzVector3D &vector);
     operator QString() const { return QString("X:%1, Y:%2, Z:%3").arg(x,0,'e',24).arg(y).arg(z); }
+
+    QVector3D  toFloat() const;
 };
 
 // related non-member operators
@@ -40,4 +42,6 @@ using BzVelocityList  = QList<BzVelocity>;
 using BzForce         = BzVector3D;
 using BzForceList     = QList<BzForce>;
 
+using BzSpin          = BzVector3D;
+using BzRotation      = BzVector3D;
 #endif // BZTYPES_H

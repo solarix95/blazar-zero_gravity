@@ -8,10 +8,14 @@ class BzBody;
 class BzConfig;
 class BzModel : public QObject
 {
+    Q_OBJECT
 public:
     BzModel();
+    virtual ~BzModel();
 
     void deserialize(const BzConfig &cfg);
+    void reset();
+
     void addBody(BzBody *body);
     void process(int ms);
 
@@ -20,6 +24,10 @@ public:
     // Attributes
     inline double  worldRadius()  const { return mWorldRadius;  }
     inline QString worldTexture() const { return mWorldTexture; }
+
+signals:
+    void aboutToReset();
+    void loaded();
 
 private:
     void processLeapfrog(int ms);

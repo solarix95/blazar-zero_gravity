@@ -1,4 +1,6 @@
 #include <QFile>
+#include <QStringList>
+#include "model/bztypes.h"
 #include "bzconfig.h"
 
 //-------------------------------------------------------------------------------------------------
@@ -78,6 +80,18 @@ bool BzConfig::isValid() const
 QVariant BzConfig::parameter(const QString &name, const QVariant &defaultValue) const
 {
     return mParameters.value(name,defaultValue);
+}
+
+//-------------------------------------------------------------------------------------------------
+bool BzConfig::parameter(const QString &name, BzVector3D &vector) const
+{
+    QStringList parts = parameter(name).toString().split(" ",Qt::SkipEmptyParts);
+    if (parts.count() != 3)
+        return false;
+    vector.x = parts[0].toDouble();
+    vector.y = parts[1].toDouble();
+    vector.z = parts[2].toDouble();
+    return true;
 }
 
 //-------------------------------------------------------------------------------------------------

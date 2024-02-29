@@ -13,9 +13,18 @@ BzModel::BzModel()
 }
 
 //-------------------------------------------------------------------------------------------------
+BzModel::~BzModel()
+{
+    reset();
+}
+
+//-------------------------------------------------------------------------------------------------
 void BzModel::deserialize(const BzConfig &cfg)
 {
-    Q_ASSERT(cfg.isValid());
+    if (!cfg.isValid())
+        return;
+
+    reset();
 
     auto planets  = cfg.childsByType("planet");
 
@@ -33,11 +42,33 @@ void BzModel::deserialize(const BzConfig &cfg)
             continue;
 
         auto *planet   = new BzPlanet(mass,radius,texture);
+
+        planet->setIdent(planetCfg.parameter("name").toString());
+
+        BzVector3D vector;
+        if (planetCfg.parameter("position",vector))
+            planet->setGlobalPos(vector);
+        if (planetCfg.parameter("spin",vector))
+                planet->setSpin(vector);
+        if (planetCfg.parameter("velocity",vector))
+                planet->setVelocity(vector);
         addBody(planet);
     }
 
     mWorldRadius = cfg.parameter("worldradius",10000).toDouble();
     mWorldTexture= cfg.parameter("worldtexture").toString();
+
+    emit loaded();
+}
+
+//-------------------------------------------------------------------------------------------------
+void BzModel::reset()
+{
+    emit aboutToReset();
+    qDeleteAll(mBodies);
+    mBodies.clear();
+    mWorldTexture.clear();
+    mWorldRadius = 0;
 }
 
 //-------------------------------------------------------------------------------------------------

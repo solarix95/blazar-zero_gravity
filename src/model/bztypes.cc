@@ -56,6 +56,12 @@ BzVector3D &BzVector3D::operator+=(const BzVector3D &vector)
 }
 
 //-------------------------------------------------------------------------------------------------
+QVector3D BzVector3D::toFloat() const
+{
+    return QVector3D(float(x), float(y), float(z));
+}
+
+//-------------------------------------------------------------------------------------------------
 const BzVector3D operator+(const BzVector3D &v1, const BzVector3D &v2)
 {
     return BzVector3D(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);

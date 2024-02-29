@@ -1,11 +1,21 @@
 #include <QDebug>
+
+#include <libqtr3d/qtr3dgeometrystate.h>
 #include "bzbody.h"
 
 //-------------------------------------------------------------------------------------------------
 BzBody::BzBody(double massInTons)
  : mMass(massInTons)
  , mTime(0)
+ , mRepresentation(nullptr)
 {
+}
+
+//-------------------------------------------------------------------------------------------------
+BzBody::~BzBody()
+{
+    if (mRepresentation)
+        mRepresentation->deleteLater();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -33,10 +43,25 @@ void BzBody::process(int ms)
     mTime += ms;
     mGlobalPos += mVelocity * ms;
 
-    /*
-    if (ident() == "earth")
-        qDebug() << ident() << mTime << 100*(mTime/(1000.0*3600*24*365)) << "[%]" << mTime/(1000.0*3600)<< "[h]"
-                 << mVelocity
-                 << mGlobalPos;
-    */
+    if (!mSpin.isNull())
+        mRotation += mSpin * ms;
+
+    if (mRepresentation) {
+        mRepresentation->setPos(mGlobalPos.toFloat());
+        mRepresentation->setRotation(mRotation.toFloat());
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
+void BzBody::setRepresentation(Qtr3dGeometryState *geometry)
+{
+    if (mRepresentation)
+        mRepresentation->deleteLater();
+    mRepresentation = geometry;
+}
+
+//-------------------------------------------------------------------------------------------------
+Qtr3dGeometryState *BzBody::representation()
+{
+    return mRepresentation;
 }

@@ -18,16 +18,20 @@
 
 #include "assets/bzconfigs.h"
 #include "assets/bztextures.h"
+#include "assets/bzfilebuffer.h"
 #include "model/bzmodel.h"
 #include "model/bzbody.h"
+#include "model/bzpart.h"
 #include "model/bzplanet.h"
 
+#include "control/bzactions.h"
 #include "dialogs/dialogmain.h"
 #include "dialogs/dialogscenarioselection.h"
 
 //-------------------------------------------------------------------------------------------------
 BlazarWidget::BlazarWidget()
  : QWidget()
+ , mActions(nullptr)
  , m3DDisplay(nullptr)
  , mMenuDisplay(nullptr)
  , mCenterWidget(nullptr)
@@ -36,9 +40,11 @@ BlazarWidget::BlazarWidget()
 }
 
 //-------------------------------------------------------------------------------------------------
-void BlazarWidget::init()
+void BlazarWidget::init(BzActions &actions)
 {
     mAssets.init("gamedata");
+    mActions = &actions;
+    mActions->bindKeySource(this);
 
     initDisplay();
 
@@ -74,6 +80,8 @@ void BlazarWidget::initDisplay()
 
     connect(m3DDisplay, &Qtr3dWidget::initialized, this, [this](){
         initModel();
+
+
     });
     initMenuWidget();
 }
@@ -84,11 +92,27 @@ void BlazarWidget::initModel()
     mModel = new BzModel();
     connect(mModel, &BzModel::loaded, this, [this]() { initRendering(); });
 
+    mActions->onSimpleEvent("incTimeScale",this,[this]() {
+        mModel->incTimeScale(+1);
+    });
+    mActions->onSimpleEvent("decTimeScale",this,[this]() {
+        mModel->incTimeScale(-1);
+    });
+
     connect(&m3DDisplay->assets()->loop(),&Qtr3dFpsLoop::step, this, [this](float ms, float normalizedSpeed) {
         mModel->process(ms);
         m3DDisplay->update();
     });
     m3DDisplay->assets()->loop().setFps(50);
+
+    connect(mModel,&BzModel::timeScaleChanged, this, [this](int ts) {
+        if (ts < 0)
+            m3DDisplay->assets()->loop().setSpeed(0);
+        if (ts == 0)
+            m3DDisplay->assets()->loop().setSpeed(0.5);
+        if (ts > 0)
+            m3DDisplay->assets()->loop().setSpeed(ts);
+    });
 
     auto scenario = mAssets.scenarios().byName("Softwaretest Mars");
     mModel->deserialize(scenario);
@@ -110,6 +134,16 @@ void BlazarWidget::initRendering()
         auto *planetRepresentation = m3DDisplay->createState(mesh);
         body->setRepresentation(planetRepresentation);
         distance = (p->globalPos().length() + p->radius() * 3) > distance ? (2*p->globalPos().length() + p->radius() * 3): distance;
+    }
+    for(auto *part: mModel->parts()) {
+
+        auto *model = m3DDisplay->createModel();
+        Qtr3d::modelByFileBuffer(*model,part->displayInfo().modelName, mAssets.models()[part->displayInfo().modelName]);
+        model->material() = Qtr3d::Material(1,0,0);
+        auto *partRepresentation = m3DDisplay->createState(model);
+        partRepresentation->setScale(10);
+        part->setRepresentation(partRepresentation);
+        // distance = (p->globalPos().length() + p->radius() * 3) > distance ? (2*p->globalPos().length() + p->radius() * 3): distance;
     }
 
     // sun1->setRotation({90,0,0});
@@ -163,20 +197,34 @@ void BlazarWidget::initMenuWidget()
 void BlazarWidget::setupMainDialog()
 {
     auto *dlg = new DialogMain();
-
-    mCenterLayout->addWidget(dlg, 1, 1, 1, 1);
-
     connect(dlg, &DialogMain::selectScenario,this, &BlazarWidget::setupNewDialog);
+    showDialog(dlg);
 }
 
 //-------------------------------------------------------------------------------------------------
 void BlazarWidget::setupNewDialog()
 {
     auto *dlg = new DialogScenarioSelection(mAssets);
-    mCenterLayout->addWidget(dlg, 1, 1, 1, 1);
-
     connect(dlg, &DialogScenarioSelection::selectedItem,this, [this](const QString &name) {
         auto scenario = mAssets.scenarios().byName(name);
         mModel->deserialize(scenario);
     });
+
+    showDialog(dlg);
+}
+
+//-------------------------------------------------------------------------------------------------
+void BlazarWidget::showDialog(QWidget *dialog)
+{
+    if (mCenterWidget) {
+        mCenterLayout->removeWidget(mCenterWidget);
+        mCenterWidget->deleteLater();
+    }
+
+    mCenterLayout->addWidget(dialog, 1, 1, 1, 1);
+    connect(dialog, &QObject::destroyed, this, [this,dialog]() {
+        if (mCenterWidget == dialog)
+            mCenterWidget = nullptr;
+    });
+    mCenterWidget = dialog;
 }

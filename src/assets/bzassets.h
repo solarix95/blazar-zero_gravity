@@ -5,6 +5,7 @@
 
 class BzTextures;
 class BzConfigs;
+class BzFileBuffer;
 
 class BzAssets
 {
@@ -13,12 +14,14 @@ public:
 
     void init(const QString &basedir);
 
-    const BzTextures &textures()  const;
-    const BzConfigs  &scenarios() const;
+    const BzTextures   &textures()  const;
+    const BzConfigs    &scenarios() const;
+    const BzFileBuffer &models()    const;
 
 private:
-    BzTextures *mTextures;
-    BzConfigs  *mScenarios;
+    BzTextures   *mTextures;
+    BzConfigs    *mScenarios;
+    BzFileBuffer *mModels;
 };
 
 #endif // BZASSETS_H

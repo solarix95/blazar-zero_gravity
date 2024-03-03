@@ -7,12 +7,13 @@
 class QGridLayout;
 class Qtr3dWidget;
 class BzModel;
+class BzActions;
 class BlazarWidget  : public QWidget
 {
 public:
     BlazarWidget();
 
-    void init();
+    void init(BzActions &actions);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);
@@ -25,8 +26,10 @@ private:
 
     void setupMainDialog();
     void setupNewDialog();
+    void showDialog(QWidget *dialog);
 
     BzAssets     mAssets;
+    BzActions   *mActions;
     Qtr3dWidget *m3DDisplay;
     QWidget     *mMenuDisplay;
     QWidget     *mCenterWidget;

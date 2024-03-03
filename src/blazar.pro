@@ -17,8 +17,10 @@ include(../../libqtr3d/libqtr3d.pro)
 SOURCES += \
     assets/bzconfig.cc \
     assets/bzconfigs.cc \
+    assets/bzfilebuffer.cc \
     assets/bzscenarios.cc \
     blazarwidget.cc \
+    control/bzactions.cc \
     dialogs/dialogmain.cc \
     dialogs/dialogscenarioselection.cc \
     main.cc \
@@ -27,6 +29,7 @@ SOURCES += \
     model/bzbody.cc \
     model/bzmodel.cc \
     model/bzobject.cc \
+    model/bzpart.cc \
     model/bzplanet.cc \
     model/bztypes.cc
 
@@ -34,14 +37,17 @@ HEADERS += \
     assets/bzassets.h \
     assets/bzconfig.h \
     assets/bzconfigs.h \
+    assets/bzfilebuffer.h \
     assets/bzscenarios.h \
     assets/bztextures.h \
     blazarwidget.h \
+    control/bzactions.h \
     dialogs/dialogmain.h \
     dialogs/dialogscenarioselection.h \
     model/bzbody.h \
     model/bzmodel.h \
     model/bzobject.h \
+    model/bzpart.h \
     model/bzplanet.h \
     model/bztypes.h
 

@@ -11,6 +11,7 @@ public:
     double z;
 
     BzVector3D(double ax = 0, double ay = 0, double az = 0) : x(ax), y(ay), z(az) {}
+    BzVector3D(const QVector3D &v) : x(v.x()), y(v.y()), z(v.z()) {}
 
     bool       isNull() const;
     double     distanceToPoint(const BzVector3D &other) const;
@@ -29,6 +30,7 @@ const BzVector3D operator+(const BzVector3D &v1, const BzVector3D &v2);
 const BzVector3D operator-(const BzVector3D &v1, const BzVector3D &v2);
 const BzVector3D operator*(double factor, const BzVector3D &vector);
 const BzVector3D operator*(const BzVector3D &vector, double factor);
+const BzVector3D operator*(const BzVector3D &vector, const BzVector3D &factor);
 const BzVector3D operator/(const BzVector3D &vector, double divisor);
 bool operator==(const BzVector3D &v1, const BzVector3D &v2);
 bool operator!=(const BzVector3D &v1, const BzVector3D &v2);

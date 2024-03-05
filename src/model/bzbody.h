@@ -11,11 +11,21 @@ class BzBody : public BzObject
 {
     Q_OBJECT
 public:
-    BzBody(double massInTons = 0.0);
+    enum Type {
+        CelestialType,
+        PartType
+    };
+
+    BzBody(Type t, double massInTons = 0.0);
     virtual ~BzBody();
 
-    inline void   setMass(double m) { mMass = m; }
-    inline double mass() const      { return mMass; }
+    inline Type   type() const      { return mType;   }
+
+    inline void   setMass(double m) { mMass = m;      }
+    inline double mass() const      { return mMass;   }
+
+    inline void   setCollisionRadius(double r) { mCollisionRadius = r;      }
+    inline double collisionRadius() const      { return mCollisionRadius;   }
 
     inline void         setGlobalPos(const BzPos &pos)       { mGlobalPos = pos; }
     inline const BzPos &globalPos() const                    { return mGlobalPos;}
@@ -33,8 +43,10 @@ public:
 protected:
 
 private:
-    qint64              mTime;
+    Type                mType;
+    qint64              mAgeMs;
     double              mMass;
+    double              mCollisionRadius;
     BzPos               mGlobalPos;
     BzRotation          mRotation;
     BzVelocity          mVelocity;

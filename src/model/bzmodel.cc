@@ -10,7 +10,11 @@
 
 //-------------------------------------------------------------------------------------------------
 BzModel::BzModel()
- : mTimeScale(1)
+ : mActiveBody(nullptr)
+ , mTimeScale(1)
+ , mTargetTimeScale(1)
+ , mCurrentTimeScale(mTargetTimeScale)
+ , mDeltaTimeScale(0)
 {
 }
 
@@ -34,6 +38,10 @@ void BzModel::deserialize(const BzConfig &cfg)
     mWorldRadius = cfg.parameter("worldradius",10000).toDouble();
     mWorldTexture= cfg.parameter("worldtexture").toString();
 
+    setTimeScale(1.0);
+    mCurrentTimeScale = mTargetTimeScale = 1;
+    mDeltaTimeScale   = 0.0;
+
     emit loaded();
 }
 
@@ -52,13 +60,8 @@ void BzModel::addBody(BzBody *body)
 {
     Q_ASSERT(body);
     mBodies << body;
-}
-
-//-------------------------------------------------------------------------------------------------
-void BzModel::addPart(BzPart *part)
-{
-    Q_ASSERT(part);
-    mParts << part;
+    if (body->type() == BzBody::CelestialType)
+        mCelestials << body;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -68,6 +71,19 @@ void BzModel::setTimeScale(int newScale)
         return;
     mTimeScale = newScale;
     emit timeScaleChanged(mTimeScale);
+
+    if (mTimeScale < 0) {
+        mTargetTimeScale  = 0;
+        mCurrentTimeScale = 0;
+        mDeltaTimeScale   = 0;
+        return;
+    }
+    if (mTimeScale == 0)
+        mTargetTimeScale = 0.5;
+    if (mTimeScale > 0)
+        mTargetTimeScale = mTimeScale;
+
+    mDeltaTimeScale = (mTargetTimeScale - mCurrentTimeScale)/1000;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -100,12 +116,36 @@ void BzModel::incTimeScale(int diff)
     }
 }
 
+//-------------------------------------------------------------------------------------------------
+void BzModel::activateNextBody()
+{
+    if (mBodies.isEmpty())
+        return;
+    if (!mActiveBody) {
+        mActiveBody = mBodies.first();
+    } else {
+        int index = mBodies.indexOf(mActiveBody);
+        Q_ASSERT(index >= 0);
+        index++;
+        if (index >= mBodies.count())
+            index = 0;
+        mActiveBody = mBodies[index];
+    }
+    emit bodyActivated(mActiveBody);
+}
 
 
 //-------------------------------------------------------------------------------------------------
 void BzModel::process(int ms)
 {
     processLeapfrog(ms);
+
+    if (std::abs(mCurrentTimeScale - mTargetTimeScale) > 0.0001f) {
+        mCurrentTimeScale += mDeltaTimeScale * ms;
+        mDeltaTimeScale = (mTargetTimeScale - mCurrentTimeScale)/1000;
+        emit timeScaleChanged(mCurrentTimeScale);
+        qDebug() << mTimeScale << mCurrentTimeScale;
+    }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -122,7 +162,7 @@ void BzModel::updateBodyVectors(int ms)
     // Update Body Forces + Velocity
     BzForceList forces;
     for(auto &nextBody: mBodies) {
-        for(const auto &other: mBodies) {
+        for(const auto &other: mCelestials) {
             if (nextBody == other)
                 continue;
 
@@ -142,38 +182,12 @@ void BzModel::updateBodyVectors(int ms)
         nextBody->accelerate(forces,ms);
         forces.clear();
     }
-
-    for(auto &nextBody: mParts) {
-        for(const auto &other: mBodies) {
-            if (nextBody == other)
-                continue;
-
-            BzVector3D v = (other->globalPos() - nextBody->globalPos());
-
-            float     d = v.length();
-            if (d <= 0)
-                continue;
-
-            v.normalize();
-
-            forces.append( v * (other->mass()/(d*d)));
-        }
-        if (forces.isEmpty())
-            continue;
-
-        nextBody->accelerate(forces,ms);
-        forces.clear();
-    }
-
 }
 
 //-------------------------------------------------------------------------------------------------
 void BzModel::updateBodyPositions(int ms)
 {
     for(auto &nextBody: mBodies)
-        nextBody->process(ms);
-
-    for(auto &nextBody: mParts)
         nextBody->process(ms);
 }
 
@@ -233,6 +247,6 @@ void BzModel::deserializeBodies(const QList<BzConfig> &bodiesConfig)
             part->setSpin(vector);
         if (planetCfg.parameter("velocity",vector))
             part->setVelocity(vector);
-        addPart(part);
+        addBody(part);
     }
 }

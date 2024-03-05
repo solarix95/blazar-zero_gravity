@@ -79,9 +79,8 @@ void BlazarWidget::initDisplay()
     setWindowTitle("Blazar - Zero-Gravity Simulator");
 
     connect(m3DDisplay, &Qtr3dWidget::initialized, this, [this](){
+        setup3D();
         initModel();
-
-
     });
     initMenuWidget();
 }
@@ -98,6 +97,9 @@ void BlazarWidget::initModel()
     mActions->onSimpleEvent("decTimeScale",this,[this]() {
         mModel->incTimeScale(-1);
     });
+    mActions->onSimpleEvent("nextBody",this,[this]() {
+        mModel->activateNextBody();
+    });
 
     connect(&m3DDisplay->assets()->loop(),&Qtr3dFpsLoop::step, this, [this](float ms, float normalizedSpeed) {
         mModel->process(ms);
@@ -105,13 +107,11 @@ void BlazarWidget::initModel()
     });
     m3DDisplay->assets()->loop().setFps(50);
 
-    connect(mModel,&BzModel::timeScaleChanged, this, [this](int ts) {
-        if (ts < 0)
-            m3DDisplay->assets()->loop().setSpeed(0);
-        if (ts == 0)
-            m3DDisplay->assets()->loop().setSpeed(0.5);
-        if (ts > 0)
+    connect(mModel,&BzModel::timeScaleChanged, this, [this](float ts) {
             m3DDisplay->assets()->loop().setSpeed(ts);
+    });
+    connect(mModel,&BzModel::bodyActivated, this, [this](BzBody *b) {
+        mCamera.follow(b);
     });
 
     auto scenario = mAssets.scenarios().byName("Softwaretest Mars");
@@ -125,32 +125,38 @@ void BlazarWidget::initRendering()
 
     double distance = 0;
     for(auto *body: mModel->bodies()) {
-        BzPlanet *p = dynamic_cast<BzPlanet*>(body);
-        if (!p)
-            continue;
-        auto *mesh = m3DDisplay->createMesh();
-        Qtr3d::meshBySphere(*mesh,640,640,p->radius(),true,mAssets.textures()[p->textureName()]);
-        mesh->material() = Qtr3d::Material(1,0,0);
-        auto *planetRepresentation = m3DDisplay->createState(mesh);
-        body->setRepresentation(planetRepresentation);
-        distance = (p->globalPos().length() + p->radius() * 3) > distance ? (2*p->globalPos().length() + p->radius() * 3): distance;
-    }
-    for(auto *part: mModel->parts()) {
-
-        auto *model = m3DDisplay->createModel();
-        Qtr3d::modelByFileBuffer(*model,part->displayInfo().modelName, mAssets.models()[part->displayInfo().modelName]);
-        model->material() = Qtr3d::Material(1,0,0);
-        auto *partRepresentation = m3DDisplay->createState(model);
-        partRepresentation->setScale(10);
-        part->setRepresentation(partRepresentation);
-        // distance = (p->globalPos().length() + p->radius() * 3) > distance ? (2*p->globalPos().length() + p->radius() * 3): distance;
+        switch(body->type()) {
+        case BzBody::CelestialType: {
+            BzPlanet *p = dynamic_cast<BzPlanet*>(body);
+            Q_ASSERT(p);
+            auto *mesh = m3DDisplay->createMesh();
+            Qtr3d::meshBySphere(*mesh,640,640,p->radius(),true,mAssets.textures()[p->textureName()]);
+            mesh->material() = Qtr3d::Material(1,0,0);
+            auto *planetRepresentation = m3DDisplay->createState(mesh);
+            body->setRepresentation(planetRepresentation);
+            distance = (p->globalPos().length() + p->radius() * 3) > distance ? (2*p->globalPos().length() + p->radius() * 3): distance;
+        } break;
+         case BzBody::PartType: {
+            BzPart *p = dynamic_cast<BzPart*>(body);
+            Q_ASSERT(p);
+            auto *model = m3DDisplay->createModel();
+            Qtr3d::modelByFileBuffer(*model,p->displayInfo().modelName, mAssets.models()[p->displayInfo().modelName]);
+            model->material() = Qtr3d::Material(1,0,0);
+            auto *partRepresentation = m3DDisplay->createState(model);
+            double radius = model->radius();
+            Q_ASSERT(radius > 0);
+            partRepresentation->setScale(10/radius);
+            p->setCollisionRadius(10);
+            p->setRepresentation(partRepresentation);
+        } break;
+        }
     }
 
     // sun1->setRotation({90,0,0});
 
     m3DDisplay->primaryLightSource()->setPos({10*distance,0.0,10*distance});
     m3DDisplay->primaryLightSource()->setAmbientStrength(0);
-    m3DDisplay->camera()->setFov(45,1,100000000);
+
     m3DDisplay->camera()->setPos(0,0,distance);
     m3DDisplay->camera()->lookAt({0,0,0},{0,1,0});
     m3DDisplay->setDefaultLighting(Qtr3d::FlatLighting);
@@ -162,7 +168,6 @@ void BlazarWidget::initRendering()
         auto *milkyway = m3DDisplay->createState(mesh);
         connect(mModel, &BzModel::aboutToReset, milkyway, &QObject::deleteLater);
     }
-
 
     /*
     static float pulsating = 0;
@@ -176,9 +181,7 @@ void BlazarWidget::initRendering()
        m3DDisplay->update();
     });
 
-
     */
-    m3DDisplay->assets()->loop().setSpeed(1);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -191,6 +194,18 @@ void BlazarWidget::initMenuWidget()
     mCenterLayout->addItem(new QSpacerItem(20, 161, QSizePolicy::Minimum, QSizePolicy::Expanding), 0, 1, 1, 1);
     mCenterLayout->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum), 1, 2, 1, 1);
     // gridLayout->addWidget(mCenterWidget = new QWidget(this), 1, 1, 1, 1);
+}
+
+//-------------------------------------------------------------------------------------------------
+void BlazarWidget::setup3D()
+{
+    m3DDisplay->camera()->setFov(45,1,100000000);
+    mCamera.setCamera(m3DDisplay->camera());
+    m3DDisplay->assets()->loop().setSpeed(1);
+
+    connect(&m3DDisplay->assets()->loop(), &Qtr3dFpsLoop::step, this, [this](int ms, float normalizedSpeed) {
+        mCamera.process(ms);
+    });
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 
 
 BzPart::BzPart(double massInTons)
- : BzBody(massInTons)
+ : BzBody(PartType, massInTons)
 {
 
 }

@@ -18,23 +18,28 @@ public:
     void reset();
 
     void addBody(BzBody *body);
-    void addPart(BzPart *part);
+
+    // User Actions
     void setTimeScale(int gamespeed);
     void incTimeScale(int diff);
+    void activateNextBody();
+
+    // Processing
     void process(int ms);
 
     inline QList<BzBody*> bodies()     const { return mBodies; }
-    inline QList<BzPart*> parts()      const { return mParts;  }
-    inline int            timeScale()  const { return mTimeScale;  }
+    inline int            timeScale()  const { return mTargetTimeScale;  }
 
-    // Attributes
+    // Rendering Attributes
     inline double  worldRadius()  const { return mWorldRadius;  }
     inline QString worldTexture() const { return mWorldTexture; }
 
 signals:
     void aboutToReset();
     void loaded();
-    void timeScaleChanged(int newScale);
+    void bodyActivated(BzBody *body);
+    void targetTimeScaleChanged(int newScale);
+    void timeScaleChanged(float newScale);
 
 private:
     void processLeapfrog(int ms);
@@ -44,9 +49,14 @@ private:
     void deserializePlanets(const QList<BzConfig> &planetConfig);
     void deserializeBodies(const QList<BzConfig> &bodiesConfig);
 
-    QList<BzBody*>  mBodies; // N-Body-Simulation, "Planets"
-    QList<BzPart*>  mParts;
+    QList<BzBody*>  mCelestials; // N-Body-Simulation, "Planets"
+    QList<BzBody*>  mBodies;     // Complete List of all actors
+    BzBody         *mActiveBody;
     int             mTimeScale;
+
+    float           mTargetTimeScale;
+    float           mCurrentTimeScale;
+    float           mDeltaTimeScale;
 
     // Representation
     double  mWorldRadius;

@@ -80,6 +80,12 @@ const BzVector3D operator*(double factor, const BzVector3D &vector)
 }
 
 //-------------------------------------------------------------------------------------------------
+const BzVector3D operator*(const BzVector3D &vector, const BzVector3D &factor)
+{
+    return BzVector3D(vector.x*factor.x, vector.y*factor.y, vector.z*factor.z);
+}
+
+//-------------------------------------------------------------------------------------------------
 const BzVector3D operator/(const BzVector3D &vector, double divisor)
 {
     Q_ASSERT(divisor != 0);

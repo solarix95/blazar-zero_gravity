@@ -4,9 +4,11 @@
 #include "bzbody.h"
 
 //-------------------------------------------------------------------------------------------------
-BzBody::BzBody(double massInTons)
- : mMass(massInTons)
- , mTime(0)
+BzBody::BzBody(Type t, double massInTons)
+ : mType(t)
+ , mAgeMs(0)
+ , mMass(massInTons)
+ , mCollisionRadius(0)
  , mRepresentation(nullptr)
 {
 }
@@ -40,7 +42,7 @@ void BzBody::accelerate(const BzForceList &forces, int ms)
 //-------------------------------------------------------------------------------------------------
 void BzBody::process(int ms)
 {
-    mTime += ms;
+    mAgeMs += ms;
     mGlobalPos += mVelocity * ms;
 
     if (!mSpin.isNull())

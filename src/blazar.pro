@@ -32,7 +32,8 @@ SOURCES += \
     model/bzpart.cc \
     model/bzplanet.cc \
     model/bztypes.cc \
-    ui/bzcamera.cc
+    ui/bzcamera.cc \
+    ui/bzheadupdisplay.cc
 
 HEADERS += \
     assets/bzassets.h \
@@ -51,7 +52,8 @@ HEADERS += \
     model/bzpart.h \
     model/bzplanet.h \
     model/bztypes.h \
-    ui/bzcamera.h
+    ui/bzcamera.h \
+    ui/bzheadupdisplay.h
 
 FORMS += \
     dialogs/dialogmain.ui \

@@ -27,12 +27,14 @@
 #include "control/bzactions.h"
 #include "dialogs/dialogmain.h"
 #include "dialogs/dialogscenarioselection.h"
+#include "ui/bzheadupdisplay.h"
 
 //-------------------------------------------------------------------------------------------------
 BlazarWidget::BlazarWidget()
  : QWidget()
  , mActions(nullptr)
  , m3DDisplay(nullptr)
+ , mHeadup(nullptr)
  , mMenuDisplay(nullptr)
  , mCenterWidget(nullptr)
  , mModel(nullptr)
@@ -64,16 +66,19 @@ void BlazarWidget::init(BzActions &actions)
 void BlazarWidget::resizeEvent(QResizeEvent *event)
 {
     m3DDisplay->setGeometry(QRect(QPoint(0,0),event->size()));
+    mHeadup->setGeometry(QRect(QPoint(0,0),event->size()));
     mMenuDisplay->setGeometry(QRect(QPoint(0,0),event->size()));
 }
 
 //-------------------------------------------------------------------------------------------------
 void BlazarWidget::initDisplay()
 {
-    m3DDisplay  = new Qtr3dWidget(Qtr3dWidget::MSAA16, this);
+    m3DDisplay   = new Qtr3dWidget(Qtr3dWidget::MSAA16, this);
+    mHeadup      = new BzHeadupDisplay(this);
     mMenuDisplay = new QWidget(this);
 
-    m3DDisplay->stackUnder(mMenuDisplay);
+    m3DDisplay->stackUnder(mHeadup);
+    mHeadup->stackUnder(mMenuDisplay);
 
     setGeometry(50,50,800,600);
     setWindowTitle("Blazar - Zero-Gravity Simulator");
@@ -101,6 +106,7 @@ void BlazarWidget::initModel()
         mModel->activateNextBody();
     });
 
+    mHeadup->setModel(mModel);
     connect(&m3DDisplay->assets()->loop(),&Qtr3dFpsLoop::step, this, [this](float ms, float normalized, int real) {
         mModel->process(ms,normalized, real);
         m3DDisplay->update();

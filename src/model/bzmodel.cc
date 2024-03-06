@@ -14,6 +14,7 @@
 BzModel::BzModel()
  : mActiveBody(nullptr)
  , mTimeScale(1)
+ , mMissionTime(0)
  , mTargetTimeScale(1)
  , mCurrentTimeScale(mTargetTimeScale)
  , mDeltaTimeScale(0)
@@ -140,6 +141,7 @@ void BzModel::activateNextBody()
 //-------------------------------------------------------------------------------------------------
 void BzModel::process(float ms, float normalizedTime, int realtime)
 {
+    mMissionTime += ms;
     processLeapfrog(ms);
 
     if (std::abs(mCurrentTimeScale - mTargetTimeScale) > 0.0001f) {

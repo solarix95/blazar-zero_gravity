@@ -9,6 +9,7 @@ class QGridLayout;
 class Qtr3dWidget;
 class BzModel;
 class BzActions;
+class BzHeadupDisplay;
 class BlazarWidget  : public QWidget
 {
 public:
@@ -34,6 +35,7 @@ private:
     BzActions   *mActions;
     BzCamera     mCamera;
     Qtr3dWidget *m3DDisplay;
+    BzHeadupDisplay *mHeadup;
     QWidget     *mMenuDisplay;
     QWidget     *mCenterWidget;
     QGridLayout *mCenterLayout;

@@ -27,8 +27,9 @@ public:
     // Processing
     void process(float ms, float normalizedTime, int realtime);
 
-    inline QList<BzBody*> bodies()     const { return mBodies; }
-    inline int            timeScale()  const { return mTargetTimeScale;  }
+    inline QList<BzBody*> bodies()     const      { return mBodies;            }
+    inline float          timeScale()  const      { return mCurrentTimeScale;  }
+    inline qint64         missionTimeSecs() const { return mMissionTime/1000;  }
 
     // Rendering Attributes
     inline double  worldRadius()  const { return mWorldRadius;  }
@@ -54,6 +55,7 @@ private:
     BzBody         *mActiveBody;
     int             mTimeScale;
 
+    double          mMissionTime;
     float           mTargetTimeScale;
     float           mCurrentTimeScale;
     float           mDeltaTimeScale;

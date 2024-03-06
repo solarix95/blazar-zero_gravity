@@ -25,7 +25,7 @@ public:
     void activateNextBody();
 
     // Processing
-    void process(int ms);
+    void process(float ms, float normalizedTime, int realtime);
 
     inline QList<BzBody*> bodies()     const { return mBodies; }
     inline int            timeScale()  const { return mTargetTimeScale;  }
@@ -42,9 +42,9 @@ signals:
     void timeScaleChanged(float newScale);
 
 private:
-    void processLeapfrog(int ms);
-    void updateBodyVectors(int ms);
-    void updateBodyPositions(int ms);
+    void processLeapfrog(float ms);
+    void updateBodyVectors(float ms);
+    void updateBodyPositions(float ms);
 
     void deserializePlanets(const QList<BzConfig> &planetConfig);
     void deserializeBodies(const QList<BzConfig> &bodiesConfig);

@@ -33,20 +33,32 @@ void BzBody::setSpeedKmS(const BzVelocity &newSpeedKmS)
 }
 
 //-------------------------------------------------------------------------------------------------
-void BzBody::accelerate(const BzForceList &forces, int ms)
+void BzBody::accelerate(const BzForceList &forces, float ms)
 {
+    /*
+    if (ident() == "Moon") {
+        qDebug() << "Moon Acceleration" << mVelocity << forces << ms << (forces.first() * ms/1000.0) << (mVelocity + (forces.first() * ms/1000.0));
+        qDebug() << mVelocity.z << ((forces.first() * ms/1000.0)).z << (mVelocity.z + ((forces.first() * ms/1000.0)).z);
+    }
+    */
     for (const auto &force: forces)
-        mVelocity += force/mMass * ms;
+        mVelocity += (force * ms/1000.0);
 }
 
 //-------------------------------------------------------------------------------------------------
-void BzBody::process(int ms)
+void BzBody::process(float ms)
 {
     mAgeMs += ms;
-    mGlobalPos += mVelocity * ms;
+    mGlobalPos += mVelocity * ms/1000.0;
 
     if (!mSpin.isNull())
-        mRotation += mSpin * ms;
+        mRotation += mSpin * ms/1000.0;
+
+    /*
+    if (ident() == "Moon")
+        qDebug() << "Moon Velocity" << mVelocity;
+
+    */
 
     if (mRepresentation) {
         mRepresentation->setPos(mGlobalPos.toFloat());

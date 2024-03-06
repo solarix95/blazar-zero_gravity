@@ -8,7 +8,7 @@ BzCamera::BzCamera()
  : QObject()
  , mCamera(nullptr)
  , mBody(nullptr)
- , mPosController(BzVector3D(0.1,0.1,0.1),BzVector3D(0.00001,0.00001,0.0001),BzVector3D(1,1,1))
+ , mPosController(BzVector3D(0.01,0.01,0.01),BzVector3D(0.0001,0.0001,0.001),BzVector3D(0.1,0.1,0.1))
  , mDirController(BzVector3D(0.1,0.1,0.1),BzVector3D(0.00001,0.00001,0.00001),BzVector3D(1,1,1))
  , mUpController(BzVector3D(0.1,0.1,0.1),BzVector3D(0.00001,0.00001,0.00001),BzVector3D(1,1,1))
 {
@@ -56,9 +56,9 @@ void BzCamera::process(int ms)
     auto target  = (mBody->globalPos() + mBody->globalPos().normalized() * mBody->collisionRadius() * 3);
     auto current = mCamera->pos();
 
-    auto diff    = mPosController.calculate(target,current,1);
+    auto diff    = mPosController.calculate(target,current,ms/20.0);
 
-    mCamera->lookAt((current-diff).toFloat(),mBody->globalPos().toFloat(),{0,1,0});
+    mCamera->lookAt((current+diff).toFloat(),mBody->globalPos().toFloat(),{0,1,0});
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -69,4 +69,5 @@ void BzCamera::init()
 
     auto target  = (mBody->globalPos() + mBody->globalPos().normalized() * mBody->collisionRadius() * 3).toFloat();
     mCamera->lookAt(target,mBody->globalPos().toFloat(),{0,1,0});
+    mPosController.reset();
 }

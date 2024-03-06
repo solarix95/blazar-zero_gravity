@@ -34,8 +34,8 @@ public:
 
     void setSpeedKmh(const BzVelocity &newSpeedKmH);
     void setSpeedKmS(const BzVelocity &newSpeedKmS);
-    void accelerate(const BzForceList &forces, int ms);
-    void process(int ms);
+    void accelerate(const BzForceList &forces, float ms);
+    void process(float ms);
 
     void setRepresentation(Qtr3dGeometryState *geometry);
     Qtr3dGeometryState *representation();

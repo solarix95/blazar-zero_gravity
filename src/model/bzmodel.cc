@@ -8,6 +8,8 @@
 #include "bzpart.h"
 #include "bzplanet.h"
 
+#define G_CONSTANT 6.674e-11  // Gravitational constant
+
 //-------------------------------------------------------------------------------------------------
 BzModel::BzModel()
  : mActiveBody(nullptr)
@@ -70,12 +72,12 @@ void BzModel::setTimeScale(int newScale)
     if (mTimeScale == newScale)
         return;
     mTimeScale = newScale;
-    emit timeScaleChanged(mTimeScale);
 
     if (mTimeScale < 0) {
         mTargetTimeScale  = 0;
         mCurrentTimeScale = 0;
         mDeltaTimeScale   = 0;
+        timeScaleChanged(0);
         return;
     }
     if (mTimeScale == 0)
@@ -136,20 +138,23 @@ void BzModel::activateNextBody()
 
 
 //-------------------------------------------------------------------------------------------------
-void BzModel::process(int ms)
+void BzModel::process(float ms, float normalizedTime, int realtime)
 {
     processLeapfrog(ms);
 
     if (std::abs(mCurrentTimeScale - mTargetTimeScale) > 0.0001f) {
-        mCurrentTimeScale += mDeltaTimeScale * ms;
+        if (realtime > 0)
+            mCurrentTimeScale += mDeltaTimeScale * realtime;
+        else
+            mCurrentTimeScale += mDeltaTimeScale;
         mDeltaTimeScale = (mTargetTimeScale - mCurrentTimeScale)/1000;
         emit timeScaleChanged(mCurrentTimeScale);
-        qDebug() << mTimeScale << mCurrentTimeScale;
+        // qDebug() << mTimeScale << mCurrentTimeScale << mDeltaTimeScale;
     }
 }
 
 //-------------------------------------------------------------------------------------------------
-void BzModel::processLeapfrog(int ms)
+void BzModel::processLeapfrog(float ms)
 {
     // qDebug() << "processLeapfrog";
     updateBodyVectors(ms);
@@ -157,7 +162,7 @@ void BzModel::processLeapfrog(int ms)
 }
 
 //-------------------------------------------------------------------------------------------------
-void BzModel::updateBodyVectors(int ms)
+void BzModel::updateBodyVectors(float ms)
 {
     // Update Body Forces + Velocity
     BzForceList forces;
@@ -174,7 +179,7 @@ void BzModel::updateBodyVectors(int ms)
 
             v.normalize();
 
-            forces.append( v * (other->mass()/(d*d)));
+            forces.append( v * 1000 /* Tons -> kg */ *((G_CONSTANT*other->mass()/(d*d))));
         }
         if (forces.isEmpty())
             continue;
@@ -185,7 +190,7 @@ void BzModel::updateBodyVectors(int ms)
 }
 
 //-------------------------------------------------------------------------------------------------
-void BzModel::updateBodyPositions(int ms)
+void BzModel::updateBodyPositions(float ms)
 {
     for(auto &nextBody: mBodies)
         nextBody->process(ms);
@@ -219,6 +224,8 @@ void BzModel::deserializePlanets(const QList<BzConfig> &planetConfig)
         if (planetCfg.parameter("velocity",vector))
             planet->setVelocity(vector);
         addBody(planet);
+
+        qDebug().noquote() << QString("%1: acceleration on surface: %2[m/s2]").arg(planet->ident()).arg(G_CONSTANT*mass/(radius * radius));
     }
 }
 

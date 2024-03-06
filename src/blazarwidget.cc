@@ -101,8 +101,8 @@ void BlazarWidget::initModel()
         mModel->activateNextBody();
     });
 
-    connect(&m3DDisplay->assets()->loop(),&Qtr3dFpsLoop::step, this, [this](float ms, float normalizedSpeed) {
-        mModel->process(ms);
+    connect(&m3DDisplay->assets()->loop(),&Qtr3dFpsLoop::step, this, [this](float ms, float normalized, int real) {
+        mModel->process(ms,normalized, real);
         m3DDisplay->update();
     });
     m3DDisplay->assets()->loop().setFps(50);
@@ -114,8 +114,10 @@ void BlazarWidget::initModel()
         mCamera.follow(b);
     });
 
-    auto scenario = mAssets.scenarios().byName("Softwaretest Mars");
+    auto scenario = mAssets.scenarios().byName("Softwaretest Earth");
     mModel->deserialize(scenario);
+    mModel->setTimeScale(-1);
+    m3DDisplay->camera()->setFov(45,100,mModel->worldRadius()*2);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -199,12 +201,12 @@ void BlazarWidget::initMenuWidget()
 //-------------------------------------------------------------------------------------------------
 void BlazarWidget::setup3D()
 {
-    m3DDisplay->camera()->setFov(45,1,100000000);
+    m3DDisplay->camera()->setFov(45,100,100000000);
     mCamera.setCamera(m3DDisplay->camera());
     m3DDisplay->assets()->loop().setSpeed(1);
 
-    connect(&m3DDisplay->assets()->loop(), &Qtr3dFpsLoop::step, this, [this](int ms, float normalizedSpeed) {
-        mCamera.process(ms);
+    connect(&m3DDisplay->assets()->loop(), &Qtr3dFpsLoop::step, this, [this](int ms, float normalizedSpeed, int real) {
+        mCamera.process(real);
     });
 }
 

@@ -5,6 +5,7 @@
 #include "model/bzmodel.h"
 #include "bzheadupdisplay.h"
 
+//-------------------------------------------------------------------------------------------------
 BzHeadupDisplay::BzHeadupDisplay(QWidget *parent)
  : QWidget(parent)
  , mModel(nullptr)
@@ -14,26 +15,30 @@ BzHeadupDisplay::BzHeadupDisplay(QWidget *parent)
        this->update();
     });
     t->start(1000/20);
-
 }
 
+//-------------------------------------------------------------------------------------------------
 void BzHeadupDisplay::setModel(BzModel *model)
 {
     mModel = model;
 }
 
+//-------------------------------------------------------------------------------------------------
 void BzHeadupDisplay::paintEvent(QPaintEvent *event)
 {
     if (!mModel)
         return;
 
     QPainter p(this);
+    p.setRenderHint(QPainter::Antialiasing);
+
     p.setPen(Qt::yellow);
 
     p.drawText(QPointF(10,10),QString::number(mModel->timeScale(),'f',1));
     p.drawText(QPointF(10,30),time2String(mModel->missionTimeSecs()));
 }
 
+//-------------------------------------------------------------------------------------------------
 QString BzHeadupDisplay::time2String(qint64 secs)
 {
     const double SECONDS_PER_MINUTE = 60;

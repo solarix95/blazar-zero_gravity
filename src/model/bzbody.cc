@@ -9,6 +9,7 @@ BzBody::BzBody(Type t, double massInTons)
  , mAgeMs(0)
  , mMass(massInTons)
  , mCollisionRadius(0)
+ , mParentBody(nullptr)
  , mRepresentation(nullptr)
 {
 }
@@ -67,6 +68,12 @@ void BzBody::process(float ms)
 }
 
 //-------------------------------------------------------------------------------------------------
+void BzBody::finalizeSetup()
+{
+    setGlobalPos(globalPosByParent());
+}
+
+//-------------------------------------------------------------------------------------------------
 void BzBody::setRepresentation(Qtr3dGeometryState *geometry)
 {
     if (mRepresentation)
@@ -78,4 +85,12 @@ void BzBody::setRepresentation(Qtr3dGeometryState *geometry)
 Qtr3dGeometryState *BzBody::representation()
 {
     return mRepresentation;
+}
+
+//-------------------------------------------------------------------------------------------------
+BzPos BzBody::globalPosByParent() const
+{
+    if (!mParentBody)
+        return globalPos();
+    return mParentBody->globalPosByParent() + mRelativePos;
 }

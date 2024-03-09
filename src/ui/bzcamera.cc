@@ -58,7 +58,9 @@ void BzCamera::process(int ms)
 
     auto diff    = mPosController.calculate(target,current,ms/20.0);
 
-    mCamera->lookAt((current+diff).toFloat(),mBody->globalPos().toFloat(),{0,1,0});
+    // mCamera->lookAt((current+diff).toFloat(),mBody->globalPos().toFloat(),{0,1,0});
+    mCamera->lookAt((mBody->globalPos() + QVector3D{3*mBody->collisionRadius(),0.0,0.0}).toFloat(),mBody->globalPos().toFloat(),{0,1,0});
+    qDebug() << mBody->globalPos() << (mBody->globalPos() + QVector3D{3*mBody->collisionRadius(),0.0,0.0}).toFloat() << (3*mBody->collisionRadius());
 }
 
 //-------------------------------------------------------------------------------------------------

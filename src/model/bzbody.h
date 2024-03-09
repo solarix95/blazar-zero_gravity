@@ -24,6 +24,13 @@ public:
     inline void   setMass(double m) { mMass = m;      }
     inline double mass() const      { return mMass;   }
 
+    inline void    setParentBodyName(const QString &name) { mParentBodyName = name;   }
+    inline QString parentBodyName() const                 { return mParentBodyName;   }
+    inline void    setParentBody(BzBody *parent)          { mParentBody = parent;     }
+    inline BzBody *parentBody() const                     { return mParentBody;       }
+    inline void    setRelativePos(const BzPos &pos)       { mRelativePos = pos;       }
+
+
     inline void   setCollisionRadius(double r) { mCollisionRadius = r;      }
     inline double collisionRadius() const      { return mCollisionRadius;   }
 
@@ -36,6 +43,7 @@ public:
     void setSpeedKmS(const BzVelocity &newSpeedKmS);
     void accelerate(const BzForceList &forces, float ms);
     void process(float ms);
+    void finalizeSetup();
 
     void setRepresentation(Qtr3dGeometryState *geometry);
     Qtr3dGeometryState *representation();
@@ -43,6 +51,8 @@ public:
 protected:
 
 private:
+    BzPos globalPosByParent() const;
+
     Type                mType;
     qint64              mAgeMs;
     double              mMass;
@@ -51,6 +61,12 @@ private:
     BzRotation          mRotation;
     BzVelocity          mVelocity;
     BzSpin              mSpin;
+
+    // Parent/Child
+    QString             mParentBodyName; // to initialze "mParentBody"
+    BzPos               mRelativePos;     // to initialze "mGlobalPos"
+    BzBody             *mParentBody;
+
     Qtr3dGeometryState *mRepresentation;
 };
 

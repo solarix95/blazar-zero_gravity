@@ -49,6 +49,8 @@ private:
 
     void deserializePlanets(const QList<BzConfig> &planetConfig);
     void deserializeBodies(const QList<BzConfig> &bodiesConfig);
+    void resolveBodyParents();
+    void finalizeSetup();
 
     QList<BzBody*>  mCelestials; // N-Body-Simulation, "Planets"
     QList<BzBody*>  mBodies;     // Complete List of all actors

@@ -37,6 +37,8 @@ void BzModel::deserialize(const BzConfig &cfg)
 
     deserializePlanets(cfg.childsByType("planet"));
     deserializeBodies(cfg.childsByType("part"));
+    resolveBodyParents();
+    finalizeSetup();
 
     mWorldRadius = cfg.parameter("worldradius",10000).toDouble();
     mWorldTexture= cfg.parameter("worldtexture").toString();
@@ -217,10 +219,13 @@ void BzModel::deserializePlanets(const QList<BzConfig> &planetConfig)
         auto *planet   = new BzPlanet(mass,radius,texture);
 
         planet->setIdent(planetCfg.parameter("name").toString());
+        planet->setParentBodyName(planetCfg.parameter("parent").toString());
 
         BzVector3D vector;
         if (planetCfg.parameter("position",vector))
             planet->setGlobalPos(vector);
+        if (planetCfg.parameter("relativeposition",vector))
+            planet->setRelativePos(vector);
         if (planetCfg.parameter("spin",vector))
             planet->setSpin(vector);
         if (planetCfg.parameter("velocity",vector))
@@ -258,4 +263,28 @@ void BzModel::deserializeBodies(const QList<BzConfig> &bodiesConfig)
             part->setVelocity(vector);
         addBody(part);
     }
+}
+
+//-------------------------------------------------------------------------------------------------
+void BzModel::resolveBodyParents()
+{
+    for(auto nextBody: mBodies) {
+        if (nextBody->parentBodyName().isEmpty())
+            continue;
+         for(auto otherBody: mBodies) {
+             if (nextBody == otherBody)
+                 continue;
+             if (nextBody->parentBodyName() == otherBody->ident()) {
+                 nextBody->setParentBody(otherBody);
+                 continue;
+             }
+         }
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
+void BzModel::finalizeSetup()
+{
+    for(auto nextBody: mBodies)
+        nextBody->finalizeSetup();
 }

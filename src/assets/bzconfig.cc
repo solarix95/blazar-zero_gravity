@@ -1,6 +1,6 @@
 #include <QFile>
 #include <QStringList>
-#include "model/bztypes.h"
+#include "types/bztypes.h"
 #include "bzconfig.h"
 
 //-------------------------------------------------------------------------------------------------

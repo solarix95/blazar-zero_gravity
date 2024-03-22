@@ -2,7 +2,7 @@
 #define BZBODY_H
 
 #include <QList>
-#include "bztypes.h"
+#include "types/bztypes.h"
 #include "bzobject.h"
 
 
@@ -38,6 +38,11 @@ public:
     inline const BzPos &globalPos() const                    { return mGlobalPos;}
     inline void         setSpin(const BzPos &spin)           { mSpin = spin;     }
     inline void         setVelocity(const BzVelocity &v)     { mVelocity = v;    }
+    inline BzVector3D   movementDirection() const            { return mVelocity.normalized(); }
+
+    inline const BzVector3D  &orientation() const            { return mOrientation; }
+    inline const BzVector3D  &up() const                     { return mUp; }
+
 
     void setSpeedKmh(const BzVelocity &newSpeedKmH);
     void setSpeedKmS(const BzVelocity &newSpeedKmS);
@@ -58,6 +63,8 @@ private:
     double              mMass;
     double              mCollisionRadius;
     BzPos               mGlobalPos;
+    BzVector3D          mOrientation;
+    BzVector3D          mUp;
     BzRotation          mRotation;
     BzVelocity          mVelocity;
     BzSpin              mSpin;

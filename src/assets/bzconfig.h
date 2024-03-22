@@ -3,6 +3,7 @@
 
 #include <QList>
 #include <QVariant>
+#include "types/bztypes.h"
 
 /*
     Config (De-)Serialization
@@ -22,7 +23,7 @@
         }
     }
 */
-class BzVector3D;
+
 class BzConfig
 {
 public:

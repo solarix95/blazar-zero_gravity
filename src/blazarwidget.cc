@@ -13,6 +13,7 @@
 #include <libqtr3d/qtr3dlightsource.h>
 #include <libqtr3d/qtr3dcamera.h>
 #include <libqtr3d/physics/qtr3dfpsloop.h>
+#include <libqtr3d/extras/qtr3dfreecameracontroller.h>
 
 #include "blazarwidget.h"
 
@@ -23,6 +24,7 @@
 #include "model/bzbody.h"
 #include "model/bzpart.h"
 #include "model/bzplanet.h"
+#include "types/bzunits.h"
 
 #include "control/bzactions.h"
 #include "dialogs/dialogmain.h"
@@ -44,7 +46,7 @@ BlazarWidget::BlazarWidget()
 //-------------------------------------------------------------------------------------------------
 void BlazarWidget::init(BzActions &actions)
 {
-    mAssets.init("gamedata");
+    mAssets.init("gamedata", "userdata");
     mActions = &actions;
     mActions->bindKeySource(this);
 
@@ -59,6 +61,10 @@ void BlazarWidget::init(BzActions &actions)
 
     connect(new QShortcut(QKeySequence("Esc"),this),&QShortcut::activated, this, [this]() {
         setupMainDialog();
+    });
+
+    mActions->onSimpleEvent("nextCamera",this,[this]() {
+        mCamera.nextMode();
     });
 }
 
@@ -79,6 +85,8 @@ void BlazarWidget::initDisplay()
 
     m3DDisplay->stackUnder(mHeadup);
     mHeadup->stackUnder(mMenuDisplay);
+    // mHeadup->stackUnder(m3DDisplay);
+    // mMenuDisplay->stackUnder(m3DDisplay);
 
     setGeometry(50,50,800,600);
     setWindowTitle("Blazar - Zero-Gravity Simulator");
@@ -106,6 +114,7 @@ void BlazarWidget::initModel()
         mModel->activateNextBody();
     });
 
+
     mHeadup->setModel(mModel);
     connect(&m3DDisplay->assets()->loop(),&Qtr3dFpsLoop::step, this, [this](float ms, float normalized, int real) {
         mModel->process(ms,normalized, real);
@@ -121,9 +130,11 @@ void BlazarWidget::initModel()
         mCamera.follow(b);
     });
 
-    auto scenario = mAssets.scenarios().byName("Softwaretest Earth2");
+    // auto scenario = mAssets.scenarios().byName("Softwaretest ISS Only");
+    // auto scenario = mAssets.scenarios().byName("Softwaretest ISS Only");
+    auto scenario = mAssets.scenarios().byName("Softwaretest Earth");
     mModel->deserialize(scenario);
-    m3DDisplay->camera()->setFov(45,100,mModel->worldRadius()*2);
+    // m3DDisplay->camera()->setFov(45,100,mModel->worldRadius()*2);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -131,18 +142,19 @@ void BlazarWidget::initRendering()
 {
     Q_ASSERT(m3DDisplay);
 
-    double distance = 0;
+
     for(auto *body: mModel->bodies()) {
         switch(body->type()) {
         case BzBody::CelestialType: {
             BzPlanet *p = dynamic_cast<BzPlanet*>(body);
             Q_ASSERT(p);
             auto *mesh = m3DDisplay->createMesh();
-            Qtr3d::meshBySphere(*mesh,640,640,p->radius(),true,mAssets.textures()[p->textureName()]);
+            qDebug() << "Planet" << p->radius();
+            Qtr3d::meshBySphere(*mesh,512,1024,BzUnit::meters2ogl(p->radius()),true,mAssets.textures()[p->textureName()].mirrored(true,false),true);
             mesh->material() = Qtr3d::Material(1,0,0);
             auto *planetRepresentation = m3DDisplay->createState(mesh);
             body->setRepresentation(planetRepresentation);
-            distance = (p->globalPos().length() + p->radius() * 3) > distance ? (2*p->globalPos().length() + p->radius() * 3): distance;
+
         } break;
          case BzBody::PartType: {
             BzPart *p = dynamic_cast<BzPart*>(body);
@@ -150,32 +162,43 @@ void BlazarWidget::initRendering()
             auto *model = m3DDisplay->createModel();
             Qtr3d::modelByFileBuffer(*model,p->displayInfo().modelName, mAssets.models()[p->displayInfo().modelName]);
             model->material() = Qtr3d::Material(1,0,0);
+            model->setFaceOrientation(Qtr3d::CounterClockWise);
             auto *partRepresentation = m3DDisplay->createState(model);
-            double radius = model->radius();
-            Q_ASSERT(radius > 0);
-            partRepresentation->setScale(10/radius);
-            p->setCollisionRadius(10);
+            double radius = p->collisionRadius();
+            if (radius > 0)
+                partRepresentation->setScale(BzUnit::meters2ogl(radius/model->radius()));
+            else
+                radius = partRepresentation->radius();
+
+            p->setCollisionRadius(radius);
             p->setRepresentation(partRepresentation);
+
         } break;
         }
     }
 
     // sun1->setRotation({90,0,0});
 
-    m3DDisplay->primaryLightSource()->setPos({10*distance,0.0,10*distance});
-    m3DDisplay->primaryLightSource()->setAmbientStrength(0);
+    m3DDisplay->camera()->setFov(60,0.01,100000);
+    // m3DDisplay->camera()->lookAt({2, 0, -214578},{0,0,0},{0,1,0});
 
-    m3DDisplay->camera()->setPos(0,0,distance);
-    m3DDisplay->camera()->lookAt({0,0,0},{0,1,0});
-    m3DDisplay->setDefaultLighting(Qtr3d::FlatLighting);
+    // m3DDisplay->primaryLightSource()->setPos({10*distance,0.0,10*distance});
+    // m3DDisplay->primaryLightSource()->setAmbientStrength(0);
+
+    // m3DDisplay->camera()->setPos(0,0,distance);
+    // m3DDisplay->camera()->lookAt({0,0,0},{0,1,0});
+    m3DDisplay->setDefaultLighting(Qtr3d::NoLighting);
+
 
     if (!mModel->worldTexture().isEmpty()) {
         auto mesh = m3DDisplay->createMesh();
         Qtr3d::meshBySphere(*mesh,640,640,mModel->worldRadius(),false,mAssets.textures()[mModel->worldTexture()]);
-        mesh->material() = Qtr3d::Material(1,0,0);
+        mesh->setRenderOption(Qtr3dGeometry::BackgroundOption);
         auto *milkyway = m3DDisplay->createState(mesh);
+        milkyway->setLightingType(Qtr3d::NoLighting);
         connect(mModel, &BzModel::aboutToReset, milkyway, &QObject::deleteLater);
     }
+
 
     /*
     static float pulsating = 0;
@@ -207,8 +230,8 @@ void BlazarWidget::initMenuWidget()
 //-------------------------------------------------------------------------------------------------
 void BlazarWidget::setup3D()
 {
-    m3DDisplay->camera()->setFov(45,100,100000000);
     mCamera.setCamera(m3DDisplay->camera());
+    // new Qtr3dFreeCameraController(m3DDisplay);
     m3DDisplay->assets()->loop().setSpeed(1);
 }
 

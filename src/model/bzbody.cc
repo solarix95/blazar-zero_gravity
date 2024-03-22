@@ -2,6 +2,7 @@
 
 #include <libqtr3d/qtr3dgeometrystate.h>
 #include "bzbody.h"
+#include "types/bzunits.h"
 
 //-------------------------------------------------------------------------------------------------
 BzBody::BzBody(Type t, double massInTons)
@@ -12,6 +13,8 @@ BzBody::BzBody(Type t, double massInTons)
  , mParentBody(nullptr)
  , mRepresentation(nullptr)
 {
+    mOrientation = BzVector3D(0,0,1);
+    mUp          = BzVector3D(0,1,0);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -62,7 +65,7 @@ void BzBody::process(float ms)
     */
 
     if (mRepresentation) {
-        mRepresentation->setPos(mGlobalPos.toFloat());
+        mRepresentation->setPos(BzUnit::meters2ogl(mGlobalPos));
         mRepresentation->setRotation(mRotation.toFloat());
     }
 }

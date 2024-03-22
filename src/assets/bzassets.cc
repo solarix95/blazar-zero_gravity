@@ -13,7 +13,7 @@ BzAssets::BzAssets()
 }
 
 //-------------------------------------------------------------------------------------------------
-void BzAssets::init(const QString &basedir)
+void BzAssets::init(const QString &basedir, const QString &userdir)
 {
     Q_ASSERT(!mTextures);
     mTextures = new BzTextures();
@@ -24,6 +24,12 @@ void BzAssets::init(const QString &basedir)
 
     mModels = new BzFileBuffer();
     mModels->addFolder(basedir + "/models");
+
+    if (!userdir.isEmpty()) {
+        mTextures->addFolder(userdir + "/textures");
+        mScenarios->addFolder(userdir + "/scenarios");
+        mModels->addFolder(userdir + "/models");
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

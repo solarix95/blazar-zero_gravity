@@ -2,8 +2,9 @@
 #include <QDebug>
 
 #include "assets/bzconfig.h"
+#include "types/bztypes.h"
+
 #include "bzmodel.h"
-#include "bztypes.h"
 #include "bzbody.h"
 #include "bzpart.h"
 #include "bzplanet.h"
@@ -47,6 +48,7 @@ void BzModel::deserialize(const BzConfig &cfg)
     mCurrentTimeScale = mTargetTimeScale = 1;
     mDeltaTimeScale   = 0.0;
 
+    activateNextBody();
     emit loaded();
 }
 
@@ -55,6 +57,7 @@ void BzModel::reset()
 {
     emit aboutToReset();
     qDeleteAll(mBodies);
+    mActiveBody = nullptr;
     mBodies.clear();
     mWorldTexture.clear();
     mWorldRadius = 0;
@@ -261,6 +264,8 @@ void BzModel::deserializeBodies(const QList<BzConfig> &bodiesConfig)
             part->setSpin(vector);
         if (planetCfg.parameter("velocity",vector))
             part->setVelocity(vector);
+        part->setCollisionRadius(planetCfg.parameter("radius",QVariant(0)).toDouble());
+
         addBody(part);
     }
 }

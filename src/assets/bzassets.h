@@ -12,7 +12,7 @@ class BzAssets
 public:
     BzAssets();
 
-    void init(const QString &basedir);
+    void init(const QString &basedir, const QString &userdir = "");
 
     const BzTextures   &textures()  const;
     const BzConfigs    &scenarios() const;

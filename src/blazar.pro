@@ -31,7 +31,8 @@ SOURCES += \
     model/bzobject.cc \
     model/bzpart.cc \
     model/bzplanet.cc \
-    model/bztypes.cc \
+    types/bztypes.cc \
+    types/bzunits.cc \
     ui/bzcamera.cc \
     ui/bzheadupdisplay.cc
 
@@ -51,7 +52,8 @@ HEADERS += \
     model/bzobject.h \
     model/bzpart.h \
     model/bzplanet.h \
-    model/bztypes.h \
+    types/bztypes.h \
+    types/bzunits.h \
     ui/bzcamera.h \
     ui/bzheadupdisplay.h
 

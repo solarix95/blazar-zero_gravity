@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
     actions.bind(".","incTimeScale");
     actions.bind(",","decTimeScale");
     actions.bind("tab","nextBody");
+    actions.bind("c","nextCamera");
 
     actions.onSimpleEvent("quit", &app, [&]() {
         app.quit();

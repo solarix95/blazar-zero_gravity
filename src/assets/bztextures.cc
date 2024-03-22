@@ -35,7 +35,7 @@ QImage BzTextures::operator[](const QString &name) const
         }
     }
 
-    return image.image ? *image.image : QImage();
+    return image.image ? *image.image : (*this)["invalid.jpg"];
 
 }
 

@@ -11,6 +11,12 @@ class BzModel : public QObject
 {
     Q_OBJECT
 public:
+    struct SkyBox {
+        double  radius;
+        QString texture;
+        SkyBox() : radius(-1), texture("") {}
+    };
+
     BzModel();
     virtual ~BzModel();
 
@@ -32,8 +38,7 @@ public:
     inline qint64         missionTimeSecs() const { return mMissionTime/1000;  }
 
     // Rendering Attributes
-    inline double  worldRadius()  const { return mWorldRadius;  }
-    inline QString worldTexture() const { return mWorldTexture; }
+    inline const SkyBox  &skyBox()  const { return mSkyBox;  }
 
 signals:
     void aboutToReset();
@@ -63,8 +68,7 @@ private:
     float           mDeltaTimeScale;
 
     // Representation
-    double  mWorldRadius;
-    QString mWorldTexture;
+    SkyBox          mSkyBox;
 };
 
 #endif // BZMODEL_H

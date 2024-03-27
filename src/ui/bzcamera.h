@@ -32,6 +32,9 @@ public:
     void follow(BzBody *body);
     void process(int ms);
 
+    // Input controller
+    void zoom(float delta);
+
 private:
     void       init();
 
@@ -44,6 +47,7 @@ private:
     Mode         mMode;
     Qtr3dCamera *mCamera;
     BzBody      *mBody;
+    double       mZoom;
 
     Qtr3dPidController<BzVector3D> mPosController;
     Qtr3dPidController<BzVector3D> mDirController;

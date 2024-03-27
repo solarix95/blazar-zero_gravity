@@ -14,7 +14,7 @@
 #include <libqtr3d/qtr3dcamera.h>
 #include <libqtr3d/physics/qtr3dfpsloop.h>
 #include <libqtr3d/extras/qtr3dfreecameracontroller.h>
-
+#include <libqtr3d/extras/qtr3dwidgetinputcontroller.h>
 #include "blazarwidget.h"
 
 #include "assets/bzconfigs.h"
@@ -79,7 +79,7 @@ void BlazarWidget::resizeEvent(QResizeEvent *event)
 //-------------------------------------------------------------------------------------------------
 void BlazarWidget::initDisplay()
 {
-    m3DDisplay   = new Qtr3dWidget(Qtr3dWidget::MSAA16, this);
+    m3DDisplay   = new Qtr3dWidget((Qtr3dWidget::Options)Qtr3dWidget::MSAA16 | Qtr3dWidget::OriginRebasing, this);
     mHeadup      = new BzHeadupDisplay(this);
     mMenuDisplay = new QWidget(this);
 
@@ -96,6 +96,11 @@ void BlazarWidget::initDisplay()
         initModel();
     });
     initMenuWidget();
+
+    auto *inputController = new Qtr3dWidgetInputController(mMenuDisplay);
+    connect(inputController, &Qtr3dWidgetInputController::mouseWheel, this, [this](float delta) {
+       mCamera.zoom(delta);
+    });
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -132,7 +137,7 @@ void BlazarWidget::initModel()
 
     // auto scenario = mAssets.scenarios().byName("Softwaretest ISS Only");
     // auto scenario = mAssets.scenarios().byName("Softwaretest ISS Only");
-    auto scenario = mAssets.scenarios().byName("Softwaretest Earth");
+    auto scenario = mAssets.scenarios().byName("Softwaretest Binary Stars");
     mModel->deserialize(scenario);
     // m3DDisplay->camera()->setFov(45,100,mModel->worldRadius()*2);
 }
@@ -149,9 +154,13 @@ void BlazarWidget::initRendering()
             BzPlanet *p = dynamic_cast<BzPlanet*>(body);
             Q_ASSERT(p);
             auto *mesh = m3DDisplay->createMesh();
-            qDebug() << "Planet" << p->radius();
-            Qtr3d::meshBySphere(*mesh,512,1024,BzUnit::meters2ogl(p->radius()),true,mAssets.textures()[p->textureName()].mirrored(true,false),true);
-            mesh->material() = Qtr3d::Material(1,0,0);
+            auto texture = mAssets.textures()[p->textureName()];
+            if (texture.isNull()) {
+                qDebug() << "Invalid Texture: " << p->textureName();
+                mesh->deleteLater();
+                continue;
+            }
+            Qtr3d::meshBySphere(*mesh,512,1024,BzUnit::meters2ogl(p->collisionRadius()) ,true,mAssets.textures()[p->textureName()].mirrored(true,false),true);
             auto *planetRepresentation = m3DDisplay->createState(mesh);
             body->setRepresentation(planetRepresentation);
 
@@ -179,7 +188,9 @@ void BlazarWidget::initRendering()
 
     // sun1->setRotation({90,0,0});
 
-    m3DDisplay->camera()->setFov(60,0.01,100000);
+    // m3DDisplay->camera()->setFov(60,0.01,10000);
+    m3DDisplay->camera()->setFov(50,0.001,10000);
+    // m3DDisplay->camera()->lookAt({3*63710,3*63710,3*63710},{0,0,0},{0,1,0});
     // m3DDisplay->camera()->lookAt({2, 0, -214578},{0,0,0},{0,1,0});
 
     // m3DDisplay->primaryLightSource()->setPos({10*distance,0.0,10*distance});
@@ -190,13 +201,17 @@ void BlazarWidget::initRendering()
     m3DDisplay->setDefaultLighting(Qtr3d::NoLighting);
 
 
-    if (!mModel->worldTexture().isEmpty()) {
+    if (!mModel->skyBox().texture.isEmpty()) {
         auto mesh = m3DDisplay->createMesh();
-        Qtr3d::meshBySphere(*mesh,640,640,mModel->worldRadius(),false,mAssets.textures()[mModel->worldTexture()]);
-        mesh->setRenderOption(Qtr3dGeometry::BackgroundOption);
+        Qtr3d::meshBySphere(*mesh,640,640,mModel->skyBox().radius,false,mAssets.textures()[mModel->skyBox().texture]);
+        mesh->setRenderOption(Qtr3d::BackgroundOption); // TODO: Render tatsächlich in the background (mit shader!!!=
         auto *milkyway = m3DDisplay->createState(mesh);
         milkyway->setLightingType(Qtr3d::NoLighting);
         connect(mModel, &BzModel::aboutToReset, milkyway, &QObject::deleteLater);
+
+        connect(m3DDisplay->camera(), &Qtr3dCamera::positionChanged, milkyway, [milkyway, this]() {
+            milkyway->setPos(m3DDisplay->camera()->pos());
+        });
     }
 
 

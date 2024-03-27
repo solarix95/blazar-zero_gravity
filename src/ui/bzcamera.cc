@@ -77,14 +77,40 @@ void BzCamera::process(int ms)
     // mCamera->lookAt(targetPosition(),mBody->globalPos(),{0,1,0});
 
     auto dir = mBody->globalPos().normalized();
+
     if (dir.isNull())
-        dir = {1,1,1};
+        dir = Qtr3dDblVector3D(1.0,0.0,1.0).normalized();
 
-    auto pos = mBody->globalPos() + dir*3*mBody->collisionRadius();
+    auto pos = mBody->globalPos() + mZoom*dir*3.0*mBody->collisionRadius();
 
-    mCamera->lookAt(BzUnit::meters2ogl(pos),BzUnit::meters2ogl(mBody->globalPos()),{0,1,0});
+    // qDebug() << mBody->globalPos().toFloat() << dir.toFloat() << mBody->collisionRadius() << pos.toFloat();
 
-    qDebug() << mBody->collisionRadius() << targetPosition().toFloat() << mBody->globalPos().toFloat() << mBody->representation()->pos().toFloat() << mCamera->pos().toFloat();
+     // qDebug() << BzUnit::meters2ogl(mBody->globalPos()).toFloat() << mBody->representation()->pos().toFloat();
+     // qDebug() << BzUnit::meters2ogl(mBody->collisionRadius())     << mBody->representation()->radius();
+
+     auto pos1 = mBody->representation()->pos()        + mBody->representation()->pos().normalized()*3.0*mBody->representation()->radius();
+     auto pos2 = BzUnit::meters2ogl(mBody->globalPos() + mBody->globalPos().normalized()*mZoom*3.0*mBody->collisionRadius());
+     // qDebug() << pos1.toFloat() << pos2.toFloat();
+
+    // mCamera->lookAt(BzUnit::meters2ogl(pos),-dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+    mCamera->lookAt(BzUnit::meters2ogl(pos),{0,0,0} /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+
+
+     // mCamera->lookAt(mBody->representation()->pos() + mBody->representation()->pos().normalized()*3.0*mBody->representation()->radius(),-dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+     //mCamera->lookAt(pos2,-dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+
+
+     // mCamera->lookAt({3*63710,3*63710,3*63710},{0,0,0},{0,1,0});
+    // mCamera->lookAt({3*63710,3*63710,3*63710},{0,0,0},{0,1,0});
+
+    // qDebug() << mBody->collisionRadius() << targetPosition().toFloat() << mBody->globalPos().toFloat() << mBody->representation()->pos().toFloat() << mCamera->pos().toFloat();
+    // qDebug() << BzUnit::meters2ogl(pos).toFloat() << BzUnit::meters2ogl(mBody->globalPos()).toFloat();
+}
+
+//-------------------------------------------------------------------------------------------------
+void BzCamera::zoom(float delta)
+{
+    mZoom += (delta/120.0)/10.0;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -93,6 +119,7 @@ void BzCamera::init()
     if (!mCamera || !mBody)
         return;
 
+    mZoom = 1;
     onModeChange();
 }
 

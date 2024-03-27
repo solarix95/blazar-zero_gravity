@@ -38,15 +38,21 @@ void BzModel::deserialize(const BzConfig &cfg)
 
     deserializePlanets(cfg.childsByType("planet"));
     deserializeBodies(cfg.childsByType("part"));
+    auto skyBoxes = cfg.childsByType("skybox");
+    if (skyBoxes.count() >= 1) {
+        mSkyBox.radius  = skyBoxes.first().parameter("radius").toDouble();
+        mSkyBox.texture = skyBoxes.first().parameter("texture").toString();
+    }
+
     resolveBodyParents();
     finalizeSetup();
 
-    mWorldRadius = cfg.parameter("worldradius",10000).toDouble();
-    mWorldTexture= cfg.parameter("worldtexture").toString();
-
-    setTimeScale(1.0);
+    // setTimeScale(1.0);
+    mTimeScale        = 1;
     mCurrentTimeScale = mTargetTimeScale = 1;
     mDeltaTimeScale   = 0.0;
+    mMissionTime      = 0;
+    emit timeScaleChanged(mCurrentTimeScale);
 
     activateNextBody();
     emit loaded();
@@ -59,8 +65,7 @@ void BzModel::reset()
     qDeleteAll(mBodies);
     mActiveBody = nullptr;
     mBodies.clear();
-    mWorldTexture.clear();
-    mWorldRadius = 0;
+    mSkyBox = SkyBox();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -186,7 +191,7 @@ void BzModel::updateBodyVectors(float ms)
 
             v.normalize();
 
-            forces.append( v * 1000 /* Tons -> kg */ *((G_CONSTANT*other->mass()/(d*d))));
+            forces.append( v * 1000.0 /* Tons -> kg */ *((G_CONSTANT*other->mass()/(d*d))));
         }
         if (forces.isEmpty())
             continue;

@@ -92,8 +92,8 @@ void BzCamera::process(int ms)
      auto pos2 = BzUnit::meters2ogl(mBody->globalPos() + mBody->globalPos().normalized()*mZoom*3.0*mBody->collisionRadius());
      // qDebug() << pos1.toFloat() << pos2.toFloat();
 
-    // mCamera->lookAt(BzUnit::meters2ogl(pos),-dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
-    mCamera->lookAt(BzUnit::meters2ogl(pos),{0,0,0} /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+    mCamera->lookAt(BzUnit::meters2ogl(pos),-dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+    // mCamera->lookAt(BzUnit::meters2ogl(pos),{0,0,0} /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
 
 
      // mCamera->lookAt(mBody->representation()->pos() + mBody->representation()->pos().normalized()*3.0*mBody->representation()->radius(),-dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
@@ -110,7 +110,7 @@ void BzCamera::process(int ms)
 //-------------------------------------------------------------------------------------------------
 void BzCamera::zoom(float delta)
 {
-    mZoom += (delta/120.0)/10.0;
+    mZoom += -(delta/120.0)/10.0;
 }
 
 //-------------------------------------------------------------------------------------------------

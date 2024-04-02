@@ -212,66 +212,23 @@ void BzModel::updateBodyPositions(float ms)
 void BzModel::deserializePlanets(const QList<BzConfig> &planetConfig)
 {
     for (const auto &planetCfg: planetConfig) {
-        double radius   = planetCfg.parameter("radius").toDouble();
-        if (radius <= 0)
-            continue;
-
-        double mass     = planetCfg.parameter("mass").toDouble();
-        if (mass <= 0)
-            continue;
-
-        QString texture = planetCfg.parameter("texture").toString();
-        if (texture.isEmpty())
-            continue;
-
-        auto *planet   = new BzPlanet(mass,radius,texture);
-
-        planet->setIdent(planetCfg.parameter("name").toString());
-        planet->setParentBodyName(planetCfg.parameter("parent").toString());
-
-        BzVector3D vector;
-        if (planetCfg.parameter("position",vector))
-            planet->setGlobalPos(vector);
-        if (planetCfg.parameter("relativeposition",vector))
-            planet->setRelativePos(vector);
-        if (planetCfg.parameter("spin",vector))
-            planet->setSpin(vector);
-        if (planetCfg.parameter("velocity",vector))
-            planet->setVelocity(vector);
-        addBody(planet);
-
-        qDebug().noquote() << QString("%1: acceleration on surface: %2[m/s2]").arg(planet->ident()).arg(G_CONSTANT*mass/(radius * radius));
+       auto *planet   = new BzPlanet(0,0,"");
+       if (planet->deserialize(planetCfg))
+           addBody(planet);
+       else
+           planet->deleteLater();
     }
 }
 
 //-------------------------------------------------------------------------------------------------
 void BzModel::deserializeBodies(const QList<BzConfig> &bodiesConfig)
 {
-    for (const auto &planetCfg: bodiesConfig) {
-
-        double mass     = planetCfg.parameter("mass").toDouble();
-        if (mass <= 0)
-            continue;
-
-        QString modelname = planetCfg.parameter("model").toString();
-        if (modelname.isEmpty())
-            continue;
-
-        auto *part   = new BzPart(mass);
-
-        part->setIdent(planetCfg.parameter("name").toString());
-        part->displayInfo().modelName = modelname;
-
-        BzVector3D vector;
-        if (planetCfg.parameter("position",vector))
-            part->setGlobalPos(vector);
-        if (planetCfg.parameter("spin",vector))
-            part->setSpin(vector);
-        if (planetCfg.parameter("velocity",vector))
-            part->setVelocity(vector);
-        part->setCollisionRadius(planetCfg.parameter("radius",QVariant(0)).toDouble());
-
-        addBody(part);
+    for (const auto &config: bodiesConfig) {
+        auto *part   = new BzPart(0);
+        if (part->deserialize(config))
+            addBody(part);
+        else
+            part->deleteLater();
     }
 }
 

@@ -85,13 +85,24 @@ QVariant BzConfig::parameter(const QString &name, const QVariant &defaultValue) 
 //-------------------------------------------------------------------------------------------------
 bool BzConfig::parameter(const QString &name, BzVector3D &vector) const
 {
-    QStringList parts = parameter(name).toString().split(" ",Qt::SkipEmptyParts);
+    QStringList parts;
+    if (!parameter(name,parts))
+        return false;
+
     if (parts.count() != 3)
         return false;
+
     vector.x = parts[0].toDouble();
     vector.y = parts[1].toDouble();
     vector.z = parts[2].toDouble();
     return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+bool BzConfig::parameter(const QString &name, QStringList &strings) const
+{
+    strings = parameter(name).toString().split(" ",Qt::SkipEmptyParts);
+    return mParameters.contains(name);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -133,9 +144,14 @@ bool BzConfig::getKeyValue(const QByteArray &data, int &pos, QString &key, QStri
 
     pos++;
     token.clear();
-    while (pos < data.length() && data[pos] != '\n')
+    while (pos < data.length() && data[pos] != '\n' && data[pos] != '#')
         token += data[pos++];
     value = QString::fromUtf8(token).trimmed();
+
+    if (data[pos] == '#') { // Skip comment
+        while (pos < data.length() && data[pos] != '\n')
+            pos++;
+    }
 
     return pos < data.count();
 }

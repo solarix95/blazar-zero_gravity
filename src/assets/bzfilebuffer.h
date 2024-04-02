@@ -14,6 +14,7 @@ public:
 
     QByteArray operator[](const char *name) const;
     QByteArray operator[](const QString &name) const;
+    QString    absolutFileName(const QString &name) const;
 
     void reset();
     void addFolder(const QString &folder);

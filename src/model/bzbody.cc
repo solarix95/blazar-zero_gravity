@@ -6,12 +6,12 @@
 
 //-------------------------------------------------------------------------------------------------
 BzBody::BzBody(Type t, double massInTons)
- : mType(t)
- , mAgeMs(0)
- , mMass(massInTons)
- , mCollisionRadius(0)
- , mParentBody(nullptr)
- , mRepresentation(nullptr)
+    : mType(t)
+    , mAgeMs(0)
+    , mMass(massInTons)
+    , mCollisionRadius(0)
+    , mParentBody(nullptr)
+    , mRepresentation(nullptr)
 {
     mOrientation = BzVector3D(0,0,1);
     mUp          = BzVector3D(0,1,0);
@@ -22,6 +22,36 @@ BzBody::~BzBody()
 {
     if (mRepresentation)
         mRepresentation->deleteLater();
+}
+
+//-------------------------------------------------------------------------------------------------
+bool BzBody::deserialize(const BzConfig &config)
+{
+    if (!BzObject::deserialize(config))
+        return false;
+
+    double mass     = config.parameter("mass").toDouble();
+    if (mass <= 0)
+        return false;
+    setMass(mass);
+
+    BzVector3D vector;
+
+    if (config.parameter("position",vector))
+        setGlobalPos(vector);
+    if (config.parameter("relativeposition",vector))
+        setRelativePos(vector);
+    if (config.parameter("relativevelocity",vector))
+        setRelativeVelocity(vector);
+    if (config.parameter("spin",vector))
+        setSpin(vector);
+    if (config.parameter("velocity",vector))
+        setVelocity(vector);
+
+    setIdent(config.parameter("name").toString());
+    setParentBodyName(config.parameter("parent").toString());
+
+    return true;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -74,6 +104,7 @@ void BzBody::process(float ms)
 void BzBody::finalizeSetup()
 {
     setGlobalPos(globalPosByParent());
+    setVelocity(globalVelocityByParent());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -96,4 +127,12 @@ BzPos BzBody::globalPosByParent() const
     if (!mParentBody)
         return globalPos();
     return mParentBody->globalPosByParent() + mRelativePos;
+}
+
+//-------------------------------------------------------------------------------------------------
+BzVelocity BzBody::globalVelocityByParent() const
+{
+    if (!mParentBody)
+        return mVelocity;
+    return mParentBody->globalVelocityByParent() + mRelativeVelocity;
 }

@@ -20,6 +20,14 @@ QByteArray BzFileBuffer::operator [](const char *name) const
 }
 
 //-------------------------------------------------------------------------------------------------
+QString BzFileBuffer::absolutFileName(const QString &name) const
+{
+    if (!mCache.contains(name))
+        return QString();
+    return mCache[name].absolutFileName;
+}
+
+//-------------------------------------------------------------------------------------------------
 QByteArray BzFileBuffer::operator[](const QString &name) const
 {
     if (!mCache.contains(name))

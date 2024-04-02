@@ -8,6 +8,8 @@ class BzPart : public BzBody
 public:
     BzPart(double massInTons = 0.0);
 
+    bool deserialize(const BzConfig &config);
+
     struct DisplayInfo {
         QString textureName;
         QString modelName;

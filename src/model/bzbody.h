@@ -19,6 +19,8 @@ public:
     BzBody(Type t, double massInTons = 0.0);
     virtual ~BzBody();
 
+    bool deserialize(const BzConfig &config);
+
     inline Type   type() const      { return mType;   }
 
     inline void   setMass(double m) { mMass = m;      }
@@ -29,7 +31,7 @@ public:
     inline void    setParentBody(BzBody *parent)          { mParentBody = parent;     }
     inline BzBody *parentBody() const                     { return mParentBody;       }
     inline void    setRelativePos(const BzPos &pos)       { mRelativePos = pos;       }
-
+    inline void    setRelativeVelocity(const BzVelocity &v) { mRelativeVelocity = v;       }
 
     inline void   setCollisionRadius(double r) { mCollisionRadius = r;      }
     inline double collisionRadius() const      { return mCollisionRadius;   }
@@ -56,24 +58,29 @@ public:
 protected:
 
 private:
-    BzPos globalPosByParent() const;
+    BzPos      globalPosByParent() const;
+    BzVelocity globalVelocityByParent() const;
 
     Type                mType;
     qint64              mAgeMs;
     double              mMass;
     double              mCollisionRadius;
+
     BzPos               mGlobalPos;
+    BzVelocity          mVelocity;
+
     BzVector3D          mOrientation;
     BzVector3D          mUp;
     BzRotation          mRotation;
-    BzVelocity          mVelocity;
+
     BzSpin              mSpin;
 
     // Parent/Child
-    QString             mParentBodyName; // to initialze "mParentBody"
-    BzPos               mRelativePos;     // to initialze "mGlobalPos"
-    BzBody             *mParentBody;
+    QString             mParentBodyName;   // to initialze "mParentBody"
+    BzPos               mRelativePos;      // to initialze "mGlobalPos"
+    BzVelocity          mRelativeVelocity; // to initialze "mVelocity"
 
+    BzBody             *mParentBody;
     Qtr3dGeometryState *mRepresentation;
 };
 

@@ -137,7 +137,7 @@ void BlazarWidget::initModel()
 
     // auto scenario = mAssets.scenarios().byName("Softwaretest ISS Only");
     // auto scenario = mAssets.scenarios().byName("Softwaretest ISS Only");
-    auto scenario = mAssets.scenarios().byName("Softwaretest Binary Stars");
+    auto scenario = mAssets.scenarios().byName("Softwaretest Earth/ISS");
     mModel->deserialize(scenario);
     // m3DDisplay->camera()->setFov(45,100,mModel->worldRadius()*2);
 }
@@ -147,6 +147,7 @@ void BlazarWidget::initRendering()
 {
     Q_ASSERT(m3DDisplay);
 
+    Qtr3dGeometryState *primaryLightSource = nullptr; // the sun
 
     for(auto *body: mModel->bodies()) {
         switch(body->type()) {
@@ -162,15 +163,22 @@ void BlazarWidget::initRendering()
             }
             Qtr3d::meshBySphere(*mesh,512,1024,BzUnit::meters2ogl(p->collisionRadius()) ,true,mAssets.textures()[p->textureName()].mirrored(true,false),true);
             auto *planetRepresentation = m3DDisplay->createState(mesh);
+            mesh->setRenderOption(Qtr3d::ZOrderOption);
             body->setRepresentation(planetRepresentation);
+
+            if (p->tags().contains("lightsource")) {
+                primaryLightSource = planetRepresentation;
+                primaryLightSource->setLightingType(Qtr3d::NoLighting);
+            }
 
         } break;
          case BzBody::PartType: {
             BzPart *p = dynamic_cast<BzPart*>(body);
             Q_ASSERT(p);
             auto *model = m3DDisplay->createModel();
-            Qtr3d::modelByFileBuffer(*model,p->displayInfo().modelName, mAssets.models()[p->displayInfo().modelName]);
-            model->material() = Qtr3d::Material(1,0,0);
+            Qtr3d::modelByFileBuffer(*model,
+                                     mAssets.models().absolutFileName(p->displayInfo().modelName),
+                                     mAssets.models()[p->displayInfo().modelName]);
             model->setFaceOrientation(Qtr3d::CounterClockWise);
             auto *partRepresentation = m3DDisplay->createState(model);
             double radius = p->collisionRadius();
@@ -198,8 +206,14 @@ void BlazarWidget::initRendering()
 
     // m3DDisplay->camera()->setPos(0,0,distance);
     // m3DDisplay->camera()->lookAt({0,0,0},{0,1,0});
-    m3DDisplay->setDefaultLighting(Qtr3d::NoLighting);
 
+    if (primaryLightSource) {
+        connect(primaryLightSource, &Qtr3dGeometryState::updated, this, [this, primaryLightSource](){
+            m3DDisplay->primaryLightSource()->setPos(primaryLightSource->pos());
+        });
+        m3DDisplay->setDefaultLighting(Qtr3d::PhongLighting);
+    } else
+        m3DDisplay->setDefaultLighting(Qtr3d::NoLighting);
 
     if (!mModel->skyBox().texture.isEmpty()) {
         auto mesh = m3DDisplay->createMesh();

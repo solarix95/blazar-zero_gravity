@@ -3,17 +3,22 @@
 
 #include <QObject>
 #include <QString>
+#include <assets/bzconfig.h>
 
 class BzObject : public QObject
 {
 public:
     BzObject();
 
-    inline void    setIdent(const QString &ident) { mIdent = ident; }
-    inline QString ident() const               { return mIdent;  }
+    virtual bool deserialize(const BzConfig &config);
+
+    inline void        setIdent(const QString &ident) { mIdent = ident; }
+    inline QString     ident() const                  { return mIdent;  }
+    inline QStringList tags() const                   { return mTags;   }
 
 private:
-    QString mIdent;
+    QString     mIdent;
+    QStringList mTags;
 };
 
 #endif // BZOBJECT_H

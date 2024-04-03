@@ -12,12 +12,13 @@ class BzCamera : public QObject
 {
 public:
     enum Mode {
-        OrientationMode, // Over-the-Shoulder Camera
-        OrbitalMode,     // Follows flight vector, Planet is always "Bottom"
+        OrbitalMode,    // Over-the-Shoulder Camera
+        FollowMode,     // Follows flight vector, Planet is always "Bottom"
+        Front2BackMode,
 
         // Mode Rotation
-        FirstMode  = OrientationMode,
-        LastMode   = OrbitalMode,
+        FirstMode  = OrbitalMode,
+        LastMode   = Front2BackMode,
         /*
         FollowMode,      // Follows flight vector, "down" is orientation
         LockedMode,     // Follows flight vector, but static relative position/orientation

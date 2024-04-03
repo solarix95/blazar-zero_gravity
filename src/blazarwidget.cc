@@ -169,6 +169,8 @@ void BlazarWidget::initRendering()
             if (p->tags().contains("lightsource")) {
                 primaryLightSource = planetRepresentation;
                 primaryLightSource->setLightingType(Qtr3d::NoLighting);
+                mesh->material().ambient().setStrength(1);
+
             }
 
         } break;
@@ -197,7 +199,7 @@ void BlazarWidget::initRendering()
     // sun1->setRotation({90,0,0});
 
     // m3DDisplay->camera()->setFov(60,0.01,10000);
-    m3DDisplay->camera()->setFov(50,0.001,10000);
+    m3DDisplay->camera()->setFov(50,0.05,10000);
     // m3DDisplay->camera()->lookAt({3*63710,3*63710,3*63710},{0,0,0},{0,1,0});
     // m3DDisplay->camera()->lookAt({2, 0, -214578},{0,0,0},{0,1,0});
 

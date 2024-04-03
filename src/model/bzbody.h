@@ -40,6 +40,7 @@ public:
     inline const BzPos &globalPos() const                    { return mGlobalPos;}
     inline void         setSpin(const BzPos &spin)           { mSpin = spin;     }
     inline void         setVelocity(const BzVelocity &v)     { mVelocity = v;    }
+
     inline BzVector3D   movementDirection() const            { return mVelocity.normalized(); }
 
     inline const BzVector3D  &orientation() const            { return mOrientation; }

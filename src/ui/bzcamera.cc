@@ -28,7 +28,8 @@ void BzCamera::nextMode()
 {
     if (mMode == LastMode)
         mMode = FirstMode;
-    mMode = (Mode)(mMode+1);
+    else
+        mMode = (Mode)(mMode+1);
     init();
 }
 
@@ -76,31 +77,57 @@ void BzCamera::process(int ms)
     // mCamera->lookAt(target,{0,0,0},{0,1,0});
     // mCamera->lookAt(targetPosition(),mBody->globalPos(),{0,1,0});
 
-    auto dir = mBody->globalPos().normalized();
 
-    if (dir.isNull())
-        dir = Qtr3dDblVector3D(1.0,0.0,1.0).normalized();
-
-    auto pos = mBody->globalPos() + mZoom*dir*3.0*mBody->collisionRadius();
 
     // qDebug() << mBody->globalPos().toFloat() << dir.toFloat() << mBody->collisionRadius() << pos.toFloat();
 
-     // qDebug() << BzUnit::meters2ogl(mBody->globalPos()).toFloat() << mBody->representation()->pos().toFloat();
-     // qDebug() << BzUnit::meters2ogl(mBody->collisionRadius())     << mBody->representation()->radius();
+    // qDebug() << BzUnit::meters2ogl(mBody->globalPos()).toFloat() << mBody->representation()->pos().toFloat();
+    // qDebug() << BzUnit::meters2ogl(mBody->collisionRadius())     << mBody->representation()->radius();
 
-     auto pos1 = mBody->representation()->pos()        + mBody->representation()->pos().normalized()*3.0*mBody->representation()->radius();
-     auto pos2 = BzUnit::meters2ogl(mBody->globalPos() + mBody->globalPos().normalized()*mZoom*3.0*mBody->collisionRadius());
-     // qDebug() << pos1.toFloat() << pos2.toFloat();
+    // auto pos1 = mBody->representation()->pos()        + mBody->representation()->pos().normalized()*3.0*mBody->representation()->radius();
+    // auto pos2 = BzUnit::meters2ogl(mBody->globalPos() + mBody->globalPos().normalized()*mZoom*3.0*mBody->collisionRadius());
+    // qDebug() << pos1.toFloat() << pos2.toFloat();
 
-    mCamera->lookAt(BzUnit::meters2ogl(pos),-dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+    switch (mMode) {
+    case OrbitalMode: {
+        auto dir = mBody->globalPos().normalized();
+
+        if (dir.isNull())
+            dir = Qtr3dDblVector3D(1.0,0.0,1.0).normalized();
+
+        auto pos = mBody->globalPos() + mZoom*dir*3.0*mBody->collisionRadius();
+        mCamera->lookAt(BzUnit::meters2ogl(pos),-dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+    } break;
+    case FollowMode:  {
+        auto dir = -mBody->movementDirection();
+
+        if (dir.isNull())
+            dir = Qtr3dDblVector3D(1.0,0.0,1.0).normalized();
+
+        auto pos = mBody->globalPos() + mZoom*dir*3.0*mBody->collisionRadius();
+        mCamera->lookAt(BzUnit::meters2ogl(pos),BzUnit::meters2ogl(pos) - dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+    } break;
+    case Front2BackMode:  {
+        auto dir = mBody->movementDirection();
+
+        if (dir.isNull())
+            dir = Qtr3dDblVector3D(1.0,0.0,1.0).normalized();
+
+        auto pos = mBody->globalPos() + mZoom*dir*3.0*mBody->collisionRadius();
+        mCamera->lookAt(BzUnit::meters2ogl(pos),BzUnit::meters2ogl(pos) - dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+    } break;
+
+    }
+
+
     // mCamera->lookAt(BzUnit::meters2ogl(pos),{0,0,0} /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
 
 
-     // mCamera->lookAt(mBody->representation()->pos() + mBody->representation()->pos().normalized()*3.0*mBody->representation()->radius(),-dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
-     //mCamera->lookAt(pos2,-dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+    // mCamera->lookAt(mBody->representation()->pos() + mBody->representation()->pos().normalized()*3.0*mBody->representation()->radius(),-dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+    //mCamera->lookAt(pos2,-dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
 
 
-     // mCamera->lookAt({3*63710,3*63710,3*63710},{0,0,0},{0,1,0});
+    // mCamera->lookAt({3*63710,3*63710,3*63710},{0,0,0},{0,1,0});
     // mCamera->lookAt({3*63710,3*63710,3*63710},{0,0,0},{0,1,0});
 
     // qDebug() << mBody->collisionRadius() << targetPosition().toFloat() << mBody->globalPos().toFloat() << mBody->representation()->pos().toFloat() << mCamera->pos().toFloat();
@@ -140,6 +167,7 @@ BzVector3D BzCamera::targetDir() const
     Q_ASSERT(mBody);
     BzVector3D dir;
 
+    /*
     switch(mMode) {
     case OrientationMode:
         dir =  mBody->orientation();
@@ -152,6 +180,7 @@ BzVector3D BzCamera::targetDir() const
     if (dir.isNull())
         dir = BzVector3D(0,0,1);
 
+        */
     return dir;
 }
 

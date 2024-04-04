@@ -34,8 +34,11 @@ void BzHeadupDisplay::paintEvent(QPaintEvent *event)
 
     p.setPen(Qt::yellow);
 
-    p.drawText(QPointF(10,10),QString::number(mModel->timeScale(),'f',1));
-    p.drawText(QPointF(10,30),time2String(mModel->missionTimeSecs()));
+    p.drawText(QPointF(10,20),QString("%1x/%2")
+                                .arg(QString::number(mModel->timeScale(),'f',1))
+                                .arg(QString::number(mModel->timeScaleTarget(),'f',0)));
+
+    p.drawText(QPointF(10,40),time2String(mModel->missionTimeSecs()));
 }
 
 //-------------------------------------------------------------------------------------------------

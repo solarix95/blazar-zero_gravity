@@ -2,6 +2,7 @@
 #define BZBODY_H
 
 #include <QList>
+#include <QQuaternion>
 #include "types/bztypes.h"
 #include "bzobject.h"
 
@@ -36,10 +37,10 @@ public:
     inline void   setCollisionRadius(double r) { mCollisionRadius = r;      }
     inline double collisionRadius() const      { return mCollisionRadius;   }
 
-    inline void         setGlobalPos(const BzPos &pos)       { mGlobalPos = pos; }
-    inline const BzPos &globalPos() const                    { return mGlobalPos;}
-    inline void         setSpin(const BzPos &spin)           { mSpin = spin;     }
-    inline void         setVelocity(const BzVelocity &v)     { mVelocity = v;    }
+    inline void         setGlobalPos(const BzPos &pos)       { mGlobalPos = pos;  }
+    inline const BzPos &globalPos() const                    { return mGlobalPos; }
+    inline void         setRotation(const QQuaternion &spin) { mRotation = spin;  }
+    inline void         setVelocity(const BzVelocity &v)     { mVelocity = v;     }
 
     inline BzVector3D   movementDirection() const            { return mVelocity.normalized(); }
 
@@ -72,7 +73,7 @@ private:
 
     BzVector3D          mOrientation;
     BzVector3D          mUp;
-    BzRotation          mRotation;
+    QQuaternion         mRotation;
 
     BzSpin              mSpin;
 

@@ -192,6 +192,8 @@ void BlazarWidget::initRendering()
             p->setCollisionRadius(radius);
             p->setRepresentation(partRepresentation);
 
+            model->material().ambient().setStrength(0.1);
+
         } break;
         }
     }
@@ -212,6 +214,7 @@ void BlazarWidget::initRendering()
     if (primaryLightSource) {
         connect(primaryLightSource, &Qtr3dGeometryState::updated, this, [this, primaryLightSource](){
             m3DDisplay->primaryLightSource()->setPos(primaryLightSource->pos());
+            // m3DDisplay->primaryLightSource()->setAmbientStrength(0.1);
         });
         m3DDisplay->setDefaultLighting(Qtr3d::PhongLighting);
     } else
@@ -223,13 +226,12 @@ void BlazarWidget::initRendering()
         mesh->setRenderOption(Qtr3d::BackgroundOption); // TODO: Render tatsächlich in the background (mit shader!!!=
         auto *milkyway = m3DDisplay->createState(mesh);
         milkyway->setLightingType(Qtr3d::NoLighting);
-        connect(mModel, &BzModel::aboutToReset, milkyway, &QObject::deleteLater);
 
+        connect(mModel, &BzModel::aboutToReset, milkyway, &QObject::deleteLater);
         connect(m3DDisplay->camera(), &Qtr3dCamera::positionChanged, milkyway, [milkyway, this]() {
             milkyway->setPos(m3DDisplay->camera()->pos());
         });
     }
-
 
     /*
     static float pulsating = 0;

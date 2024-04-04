@@ -35,7 +35,8 @@ bool BzBody::deserialize(const BzConfig &config)
         return false;
     setMass(mass);
 
-    BzVector3D vector;
+    BzVector3D  vector;
+    BzDoubleList doubles;
 
     if (config.parameter("position",vector))
         setGlobalPos(vector);
@@ -43,8 +44,8 @@ bool BzBody::deserialize(const BzConfig &config)
         setRelativePos(vector);
     if (config.parameter("relativevelocity",vector))
         setRelativeVelocity(vector);
-    if (config.parameter("spin",vector))
-        setSpin(vector);
+    if (config.parameter("spin",doubles) && doubles.count() == 4)
+        setRotation(QQuaternion(doubles[0],doubles[1],doubles[2],doubles[3]));
     if (config.parameter("velocity",vector))
         setVelocity(vector);
 
@@ -85,8 +86,15 @@ void BzBody::process(float ms)
     mAgeMs += ms;
     mGlobalPos += mVelocity * ms/1000.0;
 
+    if (!mRotation.isIdentity()) {
+        mOrientation = mRotation.rotatedVector(mOrientation);
+        mUp          = mRotation.rotatedVector(mUp);
+    }
+
+    /*
     if (!mSpin.isNull())
         mRotation += mSpin * ms/1000.0;
+    */
 
     /*
     if (ident() == "Moon")
@@ -96,7 +104,10 @@ void BzBody::process(float ms)
 
     if (mRepresentation) {
         mRepresentation->setPos(BzUnit::meters2ogl(mGlobalPos));
-        mRepresentation->setRotation(mRotation.toFloat());
+        QMatrix4x4 rotation;
+        rotation.lookAt({0,0,0},mOrientation,mUp);
+        mRepresentation->setModelView(rotation);
+        // mRepresentation->setRotation(mRotation.toFloat());
     }
 }
 

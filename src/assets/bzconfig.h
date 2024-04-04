@@ -35,7 +35,8 @@ public:
 
     bool           isValid() const;
     QVariant       parameter(const QString &name, const QVariant &defaultValue = QVariant()) const;
-    bool           parameter(const QString &name, BzVector3D &vector) const;
+    bool           parameter(const QString &name, BzVector3D   &vector) const;
+    bool           parameter(const QString &name, BzDoubleList &numbers) const;
     bool           parameter(const QString &name, QStringList &strings) const;
 
     QList<BzConfig> childsByType(const QString &typeName) const;

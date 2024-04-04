@@ -33,9 +33,10 @@ public:
     // Processing
     void process(float ms, float normalizedTime, int realtime);
 
-    inline QList<BzBody*> bodies()     const      { return mBodies;            }
-    inline float          timeScale()  const      { return mCurrentTimeScale;  }
-    inline qint64         missionTimeSecs() const { return mMissionTime/1000;  }
+    inline QList<BzBody*> bodies()     const       { return mBodies;            }
+    inline float          timeScaleTarget()  const { return mTargetTimeScale;   }
+    inline float          timeScale()  const       { return mCurrentTimeScale;  }
+    inline qint64         missionTimeSecs() const  { return mMissionTime/1000;  }
 
     // Rendering Attributes
     inline const SkyBox  &skyBox()  const { return mSkyBox;  }

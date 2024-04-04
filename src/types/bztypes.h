@@ -4,9 +4,10 @@
 #include <QList>
 #include "libqtr3d/math3d/qtr3ddblvector.h"
 
-using BzVector3D = Qtr3dDblVector3D;
-using BzPos      = Qtr3dDblVector3D;
-using BzPosList  = QList<BzPos>;
+using BzVector3D    = Qtr3dDblVector3D;
+using BzPos         = Qtr3dDblVector3D;
+using BzPosList     = QList<BzPos>;
+using BzDoubleList  = QList<double>;
 
 using BzVelocity      = Qtr3dDblVector3D;
 using BzVelocityList  = QList<BzVelocity>;

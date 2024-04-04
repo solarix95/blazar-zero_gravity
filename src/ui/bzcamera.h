@@ -15,10 +15,11 @@ public:
         OrbitalMode,    // Over-the-Shoulder Camera
         FollowMode,     // Follows flight vector, Planet is always "Bottom"
         Front2BackMode,
+        OrientationMode,
 
         // Mode Rotation
         FirstMode  = OrbitalMode,
-        LastMode   = Front2BackMode,
+        LastMode   = OrientationMode,
         /*
         FollowMode,      // Follows flight vector, "down" is orientation
         LockedMode,     // Follows flight vector, but static relative position/orientation

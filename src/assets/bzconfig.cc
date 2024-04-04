@@ -85,19 +85,41 @@ QVariant BzConfig::parameter(const QString &name, const QVariant &defaultValue) 
 //-------------------------------------------------------------------------------------------------
 bool BzConfig::parameter(const QString &name, BzVector3D &vector) const
 {
-    QStringList parts;
-    if (!parameter(name,parts))
+    BzDoubleList numbers;
+
+    if (!parameter(name,numbers))
         return false;
 
-    if (parts.count() != 3)
+    if (numbers.count() != 3)
         return false;
 
-    vector.x = parts[0].toDouble();
-    vector.y = parts[1].toDouble();
-    vector.z = parts[2].toDouble();
+    vector.x = numbers[0];
+    vector.y = numbers[1];
+    vector.z = numbers[2];
     return true;
 }
 
+//-------------------------------------------------------------------------------------------------
+bool BzConfig::parameter(const QString &name, BzDoubleList &numbers) const
+{
+    QStringList parts;
+    numbers.clear();
+
+    if (!parameter(name,parts))
+        return false;
+
+    for(auto nextString: parts) {
+        bool done = false;
+        double nextNumber = nextString.toDouble(&done);
+        if (!done) {
+            numbers.clear();
+            return false;
+        }
+        numbers << nextNumber;
+    }
+
+    return true;
+}
 //-------------------------------------------------------------------------------------------------
 bool BzConfig::parameter(const QString &name, QStringList &strings) const
 {

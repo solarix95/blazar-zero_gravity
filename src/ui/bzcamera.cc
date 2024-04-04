@@ -16,6 +16,7 @@ BzCamera::BzCamera()
     , mUpController(BzVector3D(0.1,0.1,0.1),BzVector3D(0.00001,0.00001,0.00001),BzVector3D(1,1,1))
 {
     mMode = FirstMode;
+    mZoom = 1.0;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -58,6 +59,7 @@ void BzCamera::follow(BzBody *body)
             mBody = nullptr;
     });
 
+    mZoom = 1.0;
     init();
 }
 
@@ -117,6 +119,16 @@ void BzCamera::process(int ms)
         mCamera->lookAt(BzUnit::meters2ogl(pos),BzUnit::meters2ogl(pos) - dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
     } break;
 
+    case OrientationMode:  {
+        auto dir = mBody->orientation();
+
+        if (dir.isNull())
+            dir = Qtr3dDblVector3D(1.0,0.0,1.0).normalized();
+
+        auto pos = mBody->globalPos() + mZoom*dir*3.0*mBody->collisionRadius();
+        mCamera->lookAt(BzUnit::meters2ogl(pos),BzUnit::meters2ogl(pos) - dir /*BzUnit::meters2ogl(mBody->globalPos())*/,{0,1,0});
+    } break;
+
     }
 
 
@@ -146,7 +158,7 @@ void BzCamera::init()
     if (!mCamera || !mBody)
         return;
 
-    mZoom = 1;
+    // mZoom = 1;
     onModeChange();
 }
 
